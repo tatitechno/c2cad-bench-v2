@@ -18,14 +18,16 @@ Records in v2/runs/<run>/:
   manifest.json    one entry per invocation: code / case-file hashes, git commit, registry entries, argv, time
 Resume: a (model, arm, case, sample, round) whose response is ok or infeasible is never requested again; api
 errors are requested again on the next invocation. Analysis keeps the last record per key.
-Budget: --max-usd stops new requests once the run directory's recorded cost (from the providers' own usage
-fields, hidden reasoning included) reaches the cap; requests already in flight finish.
+Budget: --max-usd stops new requests once the recorded cost of the listed profiles in the run directory (from the
+providers' own usage fields, hidden reasoning included) reaches the cap; requests already in flight finish.
+Several processes (one per provider) may write to the same run directory: every append holds a file lock.
 """
 from __future__ import annotations
 
 import argparse
 import dataclasses
 import datetime as dt
+import fcntl
 import hashlib
 import json
 import platform
@@ -189,12 +191,14 @@ class Runner:
         self.stopped = False
         self.latest: dict[tuple, dict] = {}
         self.session: list[tuple] = []          # keys requested by this invocation (smoke report)
+        mine = {m.name for m in models}
         rp = run_dir / "responses.jsonl"
         if rp.exists():
             for line in open(rp):
                 r = json.loads(line)
                 self.latest[self.key(r)] = r
-                self.spent += r.get("cost_usd", 0.0) or 0.0
+                if r["model"] in mine:           # the budget covers this invocation's profiles only
+                    self.spent += r.get("cost_usd", 0.0) or 0.0
 
     @staticmethod
     def key(r: dict) -> tuple:
@@ -205,9 +209,15 @@ class Runner:
         return r is not None and response_status(r) != "api_error"
 
     def _write(self, name: str, rec: dict):
-        with LOCK:
+        line = json.dumps(rec, default=float) + "\n"
+        with LOCK:                                   # threads of this process
             with open(self.run_dir / name, "a") as fh:
-                fh.write(json.dumps(rec, default=float) + "\n")
+                fcntl.flock(fh, fcntl.LOCK_EX)       # other processes writing to the same run directory
+                try:
+                    fh.write(line)
+                    fh.flush()
+                finally:
+                    fcntl.flock(fh, fcntl.LOCK_UN)
 
     def request(self, mc: ModelCfg, arm: str, case: dict, sample: int, round_: int = 0, history=None, feedback=None):
         """One request and its score. Returns (response record, post-processed parts) or None if the budget stops it."""
@@ -423,7 +433,8 @@ def main(argv=None):
     ap.add_argument("--no-stream", action="store_true")
     ap.add_argument("--price-in", type=float, default=0.0)
     ap.add_argument("--price-out", type=float, default=0.0)
-    ap.add_argument("--max-usd", type=float, default=None, help="stop new requests once the run's recorded cost reaches this")
+    ap.add_argument("--max-usd", type=float, default=None,
+                    help="stop new requests once the recorded cost of the listed profiles in this run directory reaches this")
     ap.add_argument("--smoke", action="store_true", help="per (model, arm): smallest and largest feasible case, k=1")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args(argv)

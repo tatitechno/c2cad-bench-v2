@@ -5,7 +5,7 @@
 
 Sections (see reports/ANALYSIS_PLAN.md): a01 overview, statuses, cost, tiers, variance; a02 attribution (H1-H7);
 a03 scale and held-out; a04 repair (H8) and oracle channel bounds; a05 validity on live outputs, kernel build,
-failure taxonomy, sufficiency list; figures. Every number the paper quotes is also written as a LaTeX macro in
+failure taxonomy, sufficiency list; a06 annotated failure figures; figures. Every number the paper quotes is also written as a LaTeX macro in
 <out>/paper_numbers.tex, so the text cannot drift from the data.
 """
 from __future__ import annotations
@@ -18,7 +18,8 @@ from pathlib import Path
 
 V2 = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(V2))
-from analysis import a01_overview, a02_attribution, a03_generalization, a04_repair, a05_validity, figures  # noqa: E402
+from analysis import (a01_overview, a02_attribution, a03_generalization, a04_repair, a05_validity,  # noqa: E402
+                      a06_failure_figures, figures)
 from analysis.common import load, run_dirs  # noqa: E402
 
 
@@ -40,7 +41,8 @@ def main(argv=None):
     macros = {}
     for name, fn in (("a01", lambda: a01_overview.run(s, r, out)), ("a02", lambda: a02_attribution.run(s, r, out)),
                      ("a03", lambda: a03_generalization.run(s, r, out, dirs)),
-                     ("a04", lambda: a04_repair.run(s, r, out, dirs)), ("a05", lambda: a05_validity.run(s, r, out, dirs))):
+                     ("a04", lambda: a04_repair.run(s, r, out, dirs)), ("a05", lambda: a05_validity.run(s, r, out, dirs)),
+                     ("a06", lambda: a06_failure_figures.run(s, r, out, dirs))):
         if name in skip:
             continue
         t0 = time.time()

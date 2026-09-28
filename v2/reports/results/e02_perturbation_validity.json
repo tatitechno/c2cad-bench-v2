@@ -359,5 +359,100 @@
    "pattern": 0.6,
    "topology": 33.3
   }
+ },
+ {
+  "perturbation": "split every box in two",
+  "coverage": 93.94,
+  "geometry": 94.63,
+  "geometry_equiv": 94.63,
+  "type_fidelity": 100.0,
+  "semantic": 95.37,
+  "semantic_id_binding": 98.09,
+  "global_v2": 94.64,
+  "exact_rate": 68.0,
+  "by_kind": {
+   "anchor": 89.8,
+   "dimension": 97.6,
+   "mate": 88.0,
+   "orientation": 100.0,
+   "pattern": 100.0,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "split every beam in two",
+  "coverage": 80.67,
+  "geometry": 80.22,
+  "geometry_equiv": 80.22,
+  "type_fidelity": 100.0,
+  "semantic": 90.56,
+  "semantic_id_binding": 100.0,
+  "global_v2": 83.81,
+  "exact_rate": 44.0,
+  "by_kind": {
+   "anchor": 97.7,
+   "dimension": 96.6,
+   "mate": 67.3,
+   "orientation": 99.7,
+   "pattern": 90.2,
+   "topology": 93.9
+  }
+ },
+ {
+  "perturbation": "scale x1.10",
+  "coverage": 100.0,
+  "geometry": 55.93,
+  "geometry_equiv": 55.93,
+  "type_fidelity": 98.89,
+  "semantic": 66.83,
+  "semantic_id_binding": 68.53,
+  "global_v2": 74.25,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 86.7,
+   "dimension": 39.5,
+   "mate": 89.6,
+   "orientation": 98.3,
+   "pattern": 61.8,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "scale x1.25",
+  "coverage": 100.0,
+  "geometry": 20.46,
+  "geometry_equiv": 20.46,
+  "type_fidelity": 93.18,
+  "semantic": 60.65,
+  "semantic_id_binding": 65.84,
+  "global_v2": 60.37,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 85.1,
+   "dimension": 37.2,
+   "mate": 70.1,
+   "orientation": 87.5,
+   "pattern": 55.4,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "scale x1.50",
+  "coverage": 100.0,
+  "geometry": 8.89,
+  "geometry_equiv": 8.89,
+  "type_fidelity": 91.1,
+  "semantic": 60.19,
+  "semantic_id_binding": 65.58,
+  "global_v2": 56.36,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 85.6,
+   "dimension": 36.6,
+   "mate": 68.7,
+   "orientation": 88.1,
+   "pattern": 53.4,
+   "topology": 100.0
+  }
  }
 ]

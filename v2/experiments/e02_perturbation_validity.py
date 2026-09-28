@@ -125,6 +125,49 @@ def random_parts(ref, rng, keep_types=True):
     return out
 
 
+DIMS = ("size", "radius", "height", "inner_radius", "outer_radius", "base_radius", "top_radius", "ring_radius",
+        "tube_radius", "width")
+
+
+def split_boxes(ref):
+    """Every box -> two abutting halves along its longest side (same occupied volume)."""
+    out = []
+    for s in copy.deepcopy(ref):
+        if s["type"] != "box":
+            out.append(s)
+            continue
+        k = int(np.argmax(s["size"]))
+        half = list(s["size"]); half[k] /= 2
+        for sg in (-1, 1):
+            c = list(s["center"]); c[k] += sg * half[k] / 2
+            out.append({"id": len(out), "type": "box", "center": c, "size": half})
+    return out
+
+
+def split_beams(ref):
+    """Every beam -> two collinear halves meeting at its midpoint (same occupied volume)."""
+    out = []
+    for s in copy.deepcopy(ref):
+        if s["type"] != "beam":
+            out.append(s)
+            continue
+        m = ((np.array(s["start"]) + np.array(s["end"])) / 2).tolist()
+        out += [dict(s, end=m), dict(s, start=m)]
+    return out
+
+
+def scale(ref, f):
+    """Uniform scaling about the origin (an alternative 'valid design' at another size)."""
+    out = copy.deepcopy(ref)
+    for s in out:
+        for k in _pts(s):
+            s[k] = [f * x for x in s[k]]
+        for k in DIMS:
+            if k in s:
+                s[k] = [f * x for x in s[k]] if isinstance(s[k], list) else f * s[k]
+    return out
+
+
 PERTURBATIONS = [
     ("identity", lambda r, g: copy.deepcopy(r)),
     ("shuffle order", lambda r, g: shuffle(r, g)),
@@ -145,6 +188,13 @@ PERTURBATIONS = [
     ("mirror Y (handedness)", lambda r, g: mirror_y(r)),
     ("random positions, types kept", lambda r, g: random_parts(r, g, True)),
     ("count only (unit boxes, random)", lambda r, g: random_parts(r, g, False)),
+    # decomposition equivalence (z3QJ): the same volume written with more parts
+    ("split every box in two", lambda r, g: split_boxes(r)),
+    ("split every beam in two", lambda r, g: split_beams(r)),
+    # uniform rescale (z3QJ Q4): reference-agreement axes should fall, relational constraints should hold
+    ("scale x1.10", lambda r, g: scale(r, 1.10)),
+    ("scale x1.25", lambda r, g: scale(r, 1.25)),
+    ("scale x1.50", lambda r, g: scale(r, 1.50)),
 ]
 AXES = ("coverage", "geometry", "geometry_equiv", "type_fidelity", "semantic", "semantic_id_binding", "global_v2")
 

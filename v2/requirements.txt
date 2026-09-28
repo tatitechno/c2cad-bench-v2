@@ -1,0 +1,11 @@
+# C2CAD-Bench v2 (main environment; tested with Python 3.14, numpy 2.4, scipy 1.18, pandas 3.0)
+numpy>=2.0
+scipy>=1.13
+pandas>=2.2
+matplotlib>=3.9
+requests>=2.31
+anthropic>=0.122        # official SDK, used for the Anthropic provider (streaming)
+jsonschema>=4.23        # tests: references conform to the constrained-decoding schema
+pytest>=8.0
+# The cadquery arm and kernel checks run in a separate environment, v2/.venv-cad (see RUNBOOK.md):
+#   uv venv v2/.venv-cad --python 3.12 && uv pip install --python v2/.venv-cad/bin/python cadquery==2.8.0
