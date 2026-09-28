@@ -219,3 +219,17 @@ def test_heldout_reference_is_exact_and_default_answer_is_not(case):
     memorised = MAIN[(case["family"], case["level"])]["reference"]
     r = evaluate(case, memorised)
     assert not r.exact and r.semantic < 90
+
+
+def test_beam_without_section_is_kept_and_placement_scored():
+    case = next(c for c in CASES if c["case_id"] == "fractal_y_tree_level_1")
+    out = [{k: v for k, v in s.items() if k not in ("width", "height")} for s in copy.deepcopy(case["reference"])]
+    r = evaluate(case, out)
+    assert r.n_out == len(out) and r.normalize_report["beam_section_missing"] == len(out)
+    assert 60 < r.geometry < 100          # placement and orientation right, section dimensions wrong
+
+
+def test_orientation_field_as_euler_degrees_or_unit_vector():
+    sh, rep = normalize([{"type": "pipe", "center": [0, 0, 0], "inner_radius": 1, "outer_radius": 2, "height": 3, "orientation": [0, 90, 0]},
+                         {"type": "cylinder", "center": [0, 0, 0], "radius": 1, "height": 3, "orientation": [0, 1, 0]}])
+    assert np.allclose(np.abs(sh[0].axis), [1, 0, 0]) and np.allclose(sh[1].axis, [0, 1, 0])

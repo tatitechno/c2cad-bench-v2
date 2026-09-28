@@ -2,38 +2,38 @@ Case-level Spearman correlation (n = 897 outputs). Chamfer and orientation error
 
 | | iou | f2 | chamfer | orient_err |
 |---|---|---|---|---|
-| coverage | 0.470 | 0.456 | 0.340 | 0.121 |
-| geometry | 0.812 | 0.821 | 0.755 | 0.481 |
-| geometry_equiv | 0.809 | 0.819 | 0.753 | 0.455 |
-| semantic | 0.810 | 0.767 | 0.695 | 0.461 |
-| global_v2 | 0.803 | 0.790 | 0.713 | 0.453 |
+| coverage | 0.484 | 0.465 | 0.361 | 0.152 |
+| geometry | 0.807 | 0.816 | 0.753 | 0.463 |
+| geometry_equiv | 0.804 | 0.815 | 0.752 | 0.436 |
+| semantic | 0.823 | 0.777 | 0.703 | 0.464 |
+| global_v2 | 0.805 | 0.789 | 0.715 | 0.444 |
 
 Model-level rank agreement with v2 Global (Spearman over 13 model means):
 
-- iou: rho = 0.945
-- f2: rho = 0.978
-- chamfer: rho = 0.923
-- orient_err: rho = 0.687
+- iou: rho = 0.896
+- f2: rho = 0.951
+- chamfer: rho = 0.918
+- orient_err: rho = 0.736
 
 | model | Global v2 | Geom | Sem | IoU | F@2% | Chamfer | orient err (deg) |
 |---|---|---|---|---|---|---|---|
-| gemini-3.1-pro-preview | 83.6 | 80.9 | 77.7 | 0.806 | 0.916 | 0.008 | 4.7 |
-| gpt-5.4 | 81.8 | 80.1 | 74.8 | 0.726 | 0.872 | 0.012 | 2.6 |
-| gemini-2.5-pro | 79.8 | 73.0 | 74.7 | 0.742 | 0.894 | 0.010 | 10.3 |
-| gemini-3-flash-preview | 71.2 | 66.3 | 71.6 | 0.777 | 0.856 | 0.013 | 6.6 |
-| claude-opus-4-6 | 70.8 | 60.0 | 64.8 | 0.657 | 0.815 | 0.019 | 14.9 |
-| gemini-2.5-flash | 70.6 | 60.7 | 64.9 | 0.676 | 0.833 | 0.014 | 14.4 |
-| gpt-4.1 | 70.1 | 56.6 | 67.2 | 0.631 | 0.808 | 0.018 | 10.5 |
-| gpt-5.4-mini | 66.2 | 54.1 | 62.2 | 0.561 | 0.771 | 0.023 | 10.9 |
-| claude-sonnet-4-6 | 64.0 | 52.0 | 59.0 | 0.536 | 0.703 | 0.021 | 13.5 |
-| deepseek-reasoner | 60.1 | 53.4 | 55.1 | 0.555 | 0.712 | 0.019 | 12.2 |
-| kimi-k2.5 | 57.3 | 43.7 | 53.0 | 0.491 | 0.668 | 0.035 | 12.9 |
-| gemini-3.1-flash-lite-preview | 57.2 | 42.3 | 54.7 | 0.537 | 0.683 | 0.026 | 13.0 |
-| deepseek-chat | 55.8 | 33.0 | 52.5 | 0.409 | 0.618 | 0.036 | 18.5 |
+| gemini-3.1-pro-preview | 84.1 | 81.4 | 78.0 | 0.807 | 0.916 | 0.008 | 4.4 |
+| gpt-5.4 | 82.2 | 80.2 | 75.9 | 0.726 | 0.872 | 0.012 | 2.6 |
+| gemini-2.5-pro | 81.5 | 75.8 | 77.0 | 0.767 | 0.907 | 0.009 | 7.4 |
+| claude-opus-4-6 | 72.1 | 61.6 | 67.0 | 0.668 | 0.821 | 0.019 | 12.1 |
+| gemini-2.5-flash | 71.6 | 62.0 | 66.7 | 0.689 | 0.841 | 0.013 | 12.9 |
+| gemini-3-flash-preview | 71.6 | 66.9 | 72.1 | 0.780 | 0.860 | 0.013 | 5.6 |
+| gpt-4.1 | 70.4 | 56.7 | 67.8 | 0.631 | 0.808 | 0.018 | 10.4 |
+| gpt-5.4-mini | 66.6 | 54.1 | 63.2 | 0.561 | 0.771 | 0.023 | 10.9 |
+| claude-sonnet-4-6 | 64.4 | 52.1 | 60.0 | 0.536 | 0.703 | 0.021 | 13.5 |
+| deepseek-reasoner | 62.6 | 55.5 | 57.6 | 0.555 | 0.712 | 0.019 | 11.7 |
+| deepseek-chat | 58.5 | 33.8 | 55.5 | 0.409 | 0.619 | 0.036 | 17.9 |
+| gemini-3.1-flash-lite-preview | 58.0 | 42.9 | 56.5 | 0.548 | 0.688 | 0.025 | 12.2 |
+| kimi-k2.5 | 57.7 | 43.7 | 54.1 | 0.491 | 0.668 | 0.035 | 13.2 |
 
 High IoU (>= 0.8) but Sem < 60: 54 / 897 (6.0%)
 Low IoU (< 0.3) but Geom >= 80: 21 / 897 (2.3%)
-F@2% >= 0.9 but not exact (some stated constraint violated): 278 / 897 (31.0%)
+F@2% >= 0.9 but not exact (some stated constraint violated): 284 / 897 (31.7%)
 
 Examples (high IoU, low Sem):
 - kimi-k2.5 / clock_tower_mechanism_level_3: IoU 0.92, F@2% 1.00, Geom 6.2, Sem 18.8

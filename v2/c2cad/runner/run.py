@@ -127,7 +127,9 @@ def main(argv=None):
     ap.add_argument("--k", type=int, default=1)
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--run", required=True)
-    ap.add_argument("--temperature", type=float, default=None)
+    ap.add_argument("--temperature", type=float, default=1.0,
+                    help="one temperature for every model and arm (decision 2026-09-28); 1.0 is also the only value "
+                         "reasoning-model endpoints accept")
     ap.add_argument("--output-cap", type=int, required=False, default=None,
                     help="the model's documented maximum output tokens (verify per model; required for real providers)")
     ap.add_argument("--reasoning-headroom", type=int, default=0,

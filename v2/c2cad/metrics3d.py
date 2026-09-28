@@ -160,7 +160,10 @@ def _area_and_sampler(s: Shape):
 def sample_surface(shapes: list[Shape], n: int = 20000, seed: int = 0) -> np.ndarray:
     g = np.random.default_rng(seed)
     info = [_area_and_sampler(s) for s in shapes]
-    A = np.array([i[0] for i in info]); A = A / A.sum()
+    A = np.array([i[0] for i in info])
+    if not np.isfinite(A.sum()) or A.sum() <= 0:          # e.g. only sectionless beams: no surface to sample
+        return np.zeros((0, 3))
+    A = A / A.sum()
     counts = g.multinomial(n, A)
     pts = [f(k, g) for (_, f), k in zip(info, counts) if k > 0]
     return np.concatenate(pts) if pts else np.zeros((0, 3))
@@ -172,6 +175,8 @@ def chamfer_fscore(ref: list[Shape], out: list[Shape], n: int = 20000, threshold
         return float("nan"), {t: 0.0 for t in thresholds}
     D = assembly_diagonal(ref)
     A, B = sample_surface(ref, n, 1), sample_surface(out, n, 2)
+    if len(A) == 0 or len(B) == 0:
+        return float("nan"), {t: 0.0 for t in thresholds}
     da, _ = cKDTree(B).query(A); db, _ = cKDTree(A).query(B)
     ch = (da.mean() + db.mean()) / 2 / D
     fs = {}

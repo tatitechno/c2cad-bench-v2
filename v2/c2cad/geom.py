@@ -199,6 +199,7 @@ class NormalizeReport:
     ops_records: int = 0
     axis_from_euler_rotation: int = 0     # orientation given as Euler angles instead of an axis
     box_rotation_ignored: int = 0         # boxes are axis-aligned by schema; a rotation field is ignored
+    beam_section_missing: int = 0         # beams without width/height: kept, section scored as wrong
 
 
 def normalize_shape(s: Any) -> tuple[Optional[Shape], str]:
@@ -221,7 +222,15 @@ def normalize_shape(s: Any) -> tuple[Optional[Shape], str]:
     rot_used = False
     if ax is None:
         eul = _vec(_first(s, ("rotation", "rotation_deg", "euler", "euler_deg", "rot")))
-        if eul is not None:
+        ori = s.get("orientation")
+        ori_v = _vec(ori) if isinstance(ori, (list, tuple)) else None
+        if eul is None and ori_v is not None:
+            # "orientation" is ambiguous: a unit vector is read as a direction, anything else as Euler degrees
+            if abs(float(np.linalg.norm(ori_v)) - 1.0) < 1e-3:
+                ax = ori_v
+            else:
+                eul = ori_v
+        if ax is None and eul is not None:
             ax = _euler_xyz_deg(eul) @ np.array([0.0, 0.0, 1.0]); rot_used = True
     if ax is None:
         ax = np.array([0.0, 0.0, 1.0])
@@ -240,7 +249,10 @@ def normalize_shape(s: Any) -> tuple[Optional[Shape], str]:
             w = h
         if h is None:
             h = w
-        if not w or w <= 0 or h <= 0:
+        if w is None:      # section not given: keep the centerline (placement is still scorable);
+            return Shape("beam", (st + en) / 2.0, sid, axis=_unit(en - st), start=st, end=en,   # dims score as wrong
+                         width=0.0, thickness=0.0, symbolic=sym, raw=s), "ok_no_section"
+        if w <= 0 or h <= 0:
             return None, "degenerate"
         return Shape("beam", (st + en) / 2.0, sid, axis=_unit(en - st), start=st, end=en,
                      width=w, thickness=h, symbolic=sym, raw=s), "ok"
@@ -359,6 +371,7 @@ def normalize(shapes: Any) -> tuple[list[Shape], NormalizeReport]:
             out.append(sh)
             rep.axis_from_euler_rotation += why == "ok_rot"
             rep.box_rotation_ignored += why == "ok_box_rotation_ignored"
+            rep.beam_section_missing += why == "ok_no_section"
         elif why == "not_object":
             rep.dropped_not_object += 1
         elif why == "op":
