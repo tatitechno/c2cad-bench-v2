@@ -1,0 +1,363 @@
+[
+ {
+  "perturbation": "identity",
+  "coverage": 100.0,
+  "geometry": 100.0,
+  "geometry_equiv": 100.0,
+  "type_fidelity": 100.0,
+  "semantic": 100.0,
+  "semantic_id_binding": 100.0,
+  "global_v2": 100.0,
+  "exact_rate": 100.0,
+  "by_kind": {
+   "anchor": 100.0,
+   "dimension": 100.0,
+   "mate": 100.0,
+   "orientation": 100.0,
+   "pattern": 100.0,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "shuffle order",
+  "coverage": 100.0,
+  "geometry": 100.0,
+  "geometry_equiv": 100.0,
+  "type_fidelity": 100.0,
+  "semantic": 100.0,
+  "semantic_id_binding": 100.0,
+  "global_v2": 100.0,
+  "exact_rate": 100.0,
+  "by_kind": {
+   "anchor": 100.0,
+   "dimension": 100.0,
+   "mate": 100.0,
+   "orientation": 100.0,
+   "pattern": 100.0,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "ids 1-based",
+  "coverage": 100.0,
+  "geometry": 100.0,
+  "geometry_equiv": 100.0,
+  "type_fidelity": 100.0,
+  "semantic": 100.0,
+  "semantic_id_binding": 100.0,
+  "global_v2": 100.0,
+  "exact_rate": 100.0,
+  "by_kind": {
+   "anchor": 100.0,
+   "dimension": 100.0,
+   "mate": 100.0,
+   "orientation": 100.0,
+   "pattern": 100.0,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "translate 0.5 mm",
+  "coverage": 100.0,
+  "geometry": 93.91,
+  "geometry_equiv": 93.91,
+  "type_fidelity": 100.0,
+  "semantic": 85.63,
+  "semantic_id_binding": 85.63,
+  "global_v2": 93.18,
+  "exact_rate": 6.7,
+  "by_kind": {
+   "anchor": 52.9,
+   "dimension": 100.0,
+   "mate": 95.5,
+   "orientation": 95.0,
+   "pattern": 73.7,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "translate 2 mm",
+  "coverage": 100.0,
+  "geometry": 75.7,
+  "geometry_equiv": 75.7,
+  "type_fidelity": 100.0,
+  "semantic": 81.31,
+  "semantic_id_binding": 81.56,
+  "global_v2": 85.67,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 46.9,
+   "dimension": 100.0,
+   "mate": 92.7,
+   "orientation": 89.2,
+   "pattern": 57.1,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "translate 10 mm",
+  "coverage": 100.0,
+  "geometry": 32.31,
+  "geometry_equiv": 32.41,
+  "type_fidelity": 96.98,
+  "semantic": 72.59,
+  "semantic_id_binding": 80.23,
+  "global_v2": 68.3,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 48.1,
+   "dimension": 96.6,
+   "mate": 71.8,
+   "orientation": 79.2,
+   "pattern": 49.4,
+   "topology": 97.8
+  }
+ },
+ {
+  "perturbation": "rotate Z 2 deg",
+  "coverage": 100.0,
+  "geometry": 88.49,
+  "geometry_equiv": 88.49,
+  "type_fidelity": 100.0,
+  "semantic": 84.75,
+  "semantic_id_binding": 84.75,
+  "global_v2": 91.08,
+  "exact_rate": 4.0,
+  "by_kind": {
+   "anchor": 83.9,
+   "dimension": 100.0,
+   "mate": 90.1,
+   "orientation": 67.5,
+   "pattern": 73.8,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "rotate Z 10 deg",
+  "coverage": 100.0,
+  "geometry": 48.57,
+  "geometry_equiv": 48.58,
+  "type_fidelity": 99.05,
+  "semantic": 79.47,
+  "semantic_id_binding": 80.72,
+  "global_v2": 76.01,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 75.4,
+   "dimension": 99.1,
+   "mate": 83.6,
+   "orientation": 67.5,
+   "pattern": 57.9,
+   "topology": 98.0
+  }
+ },
+ {
+  "perturbation": "jitter 0.1 mm",
+  "coverage": 100.0,
+  "geometry": 97.81,
+  "geometry_equiv": 97.81,
+  "type_fidelity": 100.0,
+  "semantic": 92.36,
+  "semantic_id_binding": 92.36,
+  "global_v2": 96.73,
+  "exact_rate": 16.0,
+  "by_kind": {
+   "anchor": 94.1,
+   "dimension": 99.3,
+   "mate": 88.6,
+   "orientation": 88.3,
+   "pattern": 85.5,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "jitter 0.5 mm",
+  "coverage": 100.0,
+  "geometry": 89.23,
+  "geometry_equiv": 89.23,
+  "type_fidelity": 100.0,
+  "semantic": 58.25,
+  "semantic_id_binding": 58.25,
+  "global_v2": 82.49,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 28.7,
+   "dimension": 97.6,
+   "mate": 25.6,
+   "orientation": 73.0,
+   "pattern": 28.5,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "jitter 2 mm",
+  "coverage": 100.0,
+  "geometry": 60.57,
+  "geometry_equiv": 60.58,
+  "type_fidelity": 99.15,
+  "semantic": 45.88,
+  "semantic_id_binding": 46.23,
+  "global_v2": 68.82,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 5.6,
+   "dimension": 96.2,
+   "mate": 10.6,
+   "orientation": 67.0,
+   "pattern": 6.5,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "delete 10%",
+  "coverage": 89.5,
+  "geometry": 89.5,
+  "geometry_equiv": 89.5,
+  "type_fidelity": 89.5,
+  "semantic": 82.28,
+  "semantic_id_binding": 80.07,
+  "global_v2": 87.09,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 87.8,
+   "dimension": 89.2,
+   "mate": 71.3,
+   "orientation": 90.6,
+   "pattern": 82.4,
+   "topology": 29.4
+  }
+ },
+ {
+  "perturbation": "delete 25%",
+  "coverage": 75.01,
+  "geometry": 75.01,
+  "geometry_equiv": 75.01,
+  "type_fidelity": 75.01,
+  "semantic": 64.39,
+  "semantic_id_binding": 60.98,
+  "global_v2": 71.47,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 72.7,
+   "dimension": 74.8,
+   "mate": 49.5,
+   "orientation": 70.5,
+   "pattern": 59.3,
+   "topology": 24.1
+  }
+ },
+ {
+  "perturbation": "delete 50%",
+  "coverage": 49.82,
+  "geometry": 49.82,
+  "geometry_equiv": 49.82,
+  "type_fidelity": 49.82,
+  "semantic": 39.62,
+  "semantic_id_binding": 37.28,
+  "global_v2": 46.42,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 50.3,
+   "dimension": 49.8,
+   "mate": 21.9,
+   "orientation": 49.0,
+   "pattern": 29.8,
+   "topology": 16.6
+  }
+ },
+ {
+  "perturbation": "duplicate 50%",
+  "coverage": 66.78,
+  "geometry": 100.0,
+  "geometry_equiv": 100.0,
+  "type_fidelity": 100.0,
+  "semantic": 100.0,
+  "semantic_id_binding": 100.0,
+  "global_v2": 88.93,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 100.0,
+   "dimension": 100.0,
+   "mate": 100.0,
+   "orientation": 100.0,
+   "pattern": 100.0,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "beam -> axis-aligned box",
+  "coverage": 100.0,
+  "geometry": 80.41,
+  "geometry_equiv": 83.74,
+  "type_fidelity": 67.35,
+  "semantic": 73.53,
+  "semantic_id_binding": 73.53,
+  "global_v2": 84.65,
+  "exact_rate": 44.0,
+  "by_kind": {
+   "anchor": 88.1,
+   "dimension": 69.3,
+   "mate": 57.9,
+   "orientation": 81.7,
+   "pattern": 69.4,
+   "topology": 67.1
+  }
+ },
+ {
+  "perturbation": "mirror Y (handedness)",
+  "coverage": 100.0,
+  "geometry": 71.19,
+  "geometry_equiv": 71.19,
+  "type_fidelity": 98.02,
+  "semantic": 90.98,
+  "semantic_id_binding": 89.29,
+  "global_v2": 87.39,
+  "exact_rate": 60.0,
+  "by_kind": {
+   "anchor": 89.3,
+   "dimension": 97.8,
+   "mate": 89.6,
+   "orientation": 95.5,
+   "pattern": 83.8,
+   "topology": 100.0
+  }
+ },
+ {
+  "perturbation": "random positions, types kept",
+  "coverage": 100.0,
+  "geometry": 8.96,
+  "geometry_equiv": 8.98,
+  "type_fidelity": 73.55,
+  "semantic": 26.22,
+  "semantic_id_binding": 41.52,
+  "global_v2": 45.06,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 3.5,
+   "dimension": 69.0,
+   "mate": 4.2,
+   "orientation": 41.3,
+   "pattern": 0.7,
+   "topology": 37.9
+  }
+ },
+ {
+  "perturbation": "count only (unit boxes, random)",
+  "coverage": 100.0,
+  "geometry": 6.29,
+  "geometry_equiv": 6.63,
+  "type_fidelity": 9.16,
+  "semantic": 3.42,
+  "semantic_id_binding": 3.43,
+  "global_v2": 36.57,
+  "exact_rate": 0.0,
+  "by_kind": {
+   "anchor": 2.5,
+   "dimension": 2.8,
+   "mate": 3.5,
+   "orientation": 1.8,
+   "pattern": 0.6,
+   "topology": 33.3
+  }
+ }
+]

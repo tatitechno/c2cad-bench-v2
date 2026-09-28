@@ -1,0 +1,655 @@
+[
+ {
+  "family": "Spiral Staircase",
+  "level": 1,
+  "evaluator": "_sem_staircase",
+  "raw_golden": 1.0,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Spiral Staircase",
+  "level": 2,
+  "evaluator": "_sem_staircase",
+  "raw_golden": 1.0,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Spiral Staircase",
+  "level": 3,
+  "evaluator": "_sem_staircase",
+  "raw_golden": 1.0,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Cannonball Pyramid",
+  "level": 1,
+  "evaluator": "_sem_pyramid",
+  "raw_golden": 0.9556,
+  "instrumented": true,
+  "failing_subchecks": {
+   "interference": 0.5556
+  }
+ },
+ {
+  "family": "Cannonball Pyramid",
+  "level": 2,
+  "evaluator": "_sem_pyramid",
+  "raw_golden": 0.9737,
+  "instrumented": true,
+  "failing_subchecks": {
+   "interference": 0.7368
+  }
+ },
+ {
+  "family": "Cannonball Pyramid",
+  "level": 3,
+  "evaluator": "_sem_pyramid",
+  "raw_golden": 0.9832,
+  "instrumented": true,
+  "failing_subchecks": {
+   "interference": 0.8319
+  }
+ },
+ {
+  "family": "Voxel Grid",
+  "level": 1,
+  "evaluator": "_sem_voxel",
+  "raw_golden": 1.0,
+  "instrumented": true,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Voxel Grid",
+  "level": 2,
+  "evaluator": "_sem_voxel",
+  "raw_golden": 1.0,
+  "instrumented": true,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Voxel Grid",
+  "level": 3,
+  "evaluator": "_sem_voxel",
+  "raw_golden": 1.0,
+  "instrumented": true,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Domino Ring",
+  "level": 1,
+  "evaluator": "_sem_stonehenge",
+  "raw_golden": 0.7255,
+  "instrumented": true,
+  "failing_subchecks": {
+   "connectivity": 0.0714,
+   "angular_reg": 0.1667
+  }
+ },
+ {
+  "family": "Domino Ring",
+  "level": 2,
+  "evaluator": "_sem_stonehenge",
+  "raw_golden": 0.7525,
+  "instrumented": true,
+  "failing_subchecks": {
+   "connectivity": 0.0345,
+   "angular_reg": 0.3333
+  }
+ },
+ {
+  "family": "Domino Ring",
+  "level": 3,
+  "evaluator": "_sem_stonehenge",
+  "raw_golden": 0.8162,
+  "instrumented": true,
+  "failing_subchecks": {
+   "connectivity": 0.0169,
+   "angular_reg": 0.6667
+  }
+ },
+ {
+  "family": "DNA Helix",
+  "level": 1,
+  "evaluator": "_sem_dna",
+  "raw_golden": 0.8,
+  "instrumented": true,
+  "failing_subchecks": {
+   "z_pitch": 0.0
+  }
+ },
+ {
+  "family": "DNA Helix",
+  "level": 2,
+  "evaluator": "_sem_dna",
+  "raw_golden": 0.8,
+  "instrumented": true,
+  "failing_subchecks": {
+   "z_pitch": 0.0
+  }
+ },
+ {
+  "family": "DNA Helix",
+  "level": 3,
+  "evaluator": "_sem_dna",
+  "raw_golden": 0.8,
+  "instrumented": true,
+  "failing_subchecks": {
+   "z_pitch": 0.0
+  }
+ },
+ {
+  "family": "Suspension Bridge",
+  "level": 1,
+  "evaluator": "_sem_bridge",
+  "raw_golden": 0.7264,
+  "instrumented": true,
+  "failing_subchecks": {
+   "connectivity": 0.0769,
+   "deck_horiz": 0,
+   "cable_sym": 0.8889
+  }
+ },
+ {
+  "family": "Suspension Bridge",
+  "level": 2,
+  "evaluator": "_sem_bridge",
+  "raw_golden": 0.7295,
+  "instrumented": true,
+  "failing_subchecks": {
+   "connectivity": 0.0435,
+   "deck_horiz": 0,
+   "cable_sym": 0.9474
+  }
+ },
+ {
+  "family": "Suspension Bridge",
+  "level": 3,
+  "evaluator": "_sem_bridge",
+  "raw_golden": 0.7301,
+  "instrumented": true,
+  "failing_subchecks": {
+   "connectivity": 0.0233,
+   "deck_horiz": 0,
+   "cable_sym": 0.9744
+  }
+ },
+ {
+  "family": "Planetary Array",
+  "level": 1,
+  "evaluator": "_sem_planetary",
+  "raw_golden": 1.0,
+  "instrumented": true,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Planetary Array",
+  "level": 2,
+  "evaluator": "_sem_planetary",
+  "raw_golden": 1.0,
+  "instrumented": true,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Planetary Array",
+  "level": 3,
+  "evaluator": "_sem_planetary",
+  "raw_golden": 0.9842,
+  "instrumented": true,
+  "failing_subchecks": {
+   "interference": 0.8947
+  }
+ },
+ {
+  "family": "Cross-Braced Truss",
+  "level": 1,
+  "evaluator": "_sem_truss",
+  "raw_golden": 1.0,
+  "instrumented": true,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Cross-Braced Truss",
+  "level": 2,
+  "evaluator": "_sem_truss",
+  "raw_golden": 1.0,
+  "instrumented": true,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Cross-Braced Truss",
+  "level": 3,
+  "evaluator": "_sem_truss",
+  "raw_golden": 1.0,
+  "instrumented": true,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Fractal Y-Tree",
+  "level": 1,
+  "evaluator": "_sem_fractal",
+  "raw_golden": 0.9,
+  "instrumented": true,
+  "failing_subchecks": {
+   "continuity": 0.5
+  }
+ },
+ {
+  "family": "Fractal Y-Tree",
+  "level": 2,
+  "evaluator": "_sem_fractal",
+  "raw_golden": 0.9,
+  "instrumented": true,
+  "failing_subchecks": {
+   "continuity": 0.5
+  }
+ },
+ {
+  "family": "Fractal Y-Tree",
+  "level": 3,
+  "evaluator": "_sem_fractal",
+  "raw_golden": 0.9,
+  "instrumented": true,
+  "failing_subchecks": {
+   "continuity": 0.5
+  }
+ },
+ {
+  "family": "BCC Lattice",
+  "level": 1,
+  "evaluator": "_sem_bcc",
+  "raw_golden": 0.8987,
+  "instrumented": true,
+  "failing_subchecks": {
+   "interference": 0.9868
+  }
+ },
+ {
+  "family": "BCC Lattice",
+  "level": 2,
+  "evaluator": "_sem_bcc",
+  "raw_golden": 0.8995,
+  "instrumented": true,
+  "failing_subchecks": {
+   "interference": 0.9954
+  }
+ },
+ {
+  "family": "BCC Lattice",
+  "level": 3,
+  "evaluator": "_sem_bcc",
+  "raw_golden": 0.8998,
+  "instrumented": true,
+  "failing_subchecks": {
+   "interference": 0.9979
+  }
+ },
+ {
+  "family": "Furniture Assembly",
+  "level": 1,
+  "evaluator": "_sem_furniture",
+  "raw_golden": 0.9454,
+  "instrumented": true,
+  "failing_subchecks": {
+   "leg_symmetry": 0.6358
+  }
+ },
+ {
+  "family": "Furniture Assembly",
+  "level": 2,
+  "evaluator": "_sem_furniture",
+  "raw_golden": 0.9743,
+  "instrumented": true,
+  "failing_subchecks": {
+   "leg_symmetry": 0.8286
+  }
+ },
+ {
+  "family": "Furniture Assembly",
+  "level": 3,
+  "evaluator": "_sem_furniture",
+  "raw_golden": 0.9642,
+  "instrumented": true,
+  "failing_subchecks": {
+   "leg_symmetry": 0.7612
+  }
+ },
+ {
+  "family": "Pipe Manifold",
+  "level": 1,
+  "evaluator": "_sem_manifold",
+  "raw_golden": 0.624,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Pipe Manifold",
+  "level": 2,
+  "evaluator": "_sem_manifold",
+  "raw_golden": 0.648,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Pipe Manifold",
+  "level": 3,
+  "evaluator": "_sem_manifold",
+  "raw_golden": 0.6723,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Axle Bearing",
+  "level": 1,
+  "evaluator": "_sem_axle",
+  "raw_golden": 0.64,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Axle Bearing",
+  "level": 2,
+  "evaluator": "_sem_axle",
+  "raw_golden": 0.64,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Axle Bearing",
+  "level": 3,
+  "evaluator": "_sem_axle",
+  "raw_golden": 0.64,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Phyllotaxis Disc",
+  "level": 1,
+  "evaluator": "_sem_phyllotaxis",
+  "raw_golden": 1.0,
+  "instrumented": true,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Phyllotaxis Disc",
+  "level": 2,
+  "evaluator": "_sem_phyllotaxis",
+  "raw_golden": 1.0,
+  "instrumented": true,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Phyllotaxis Disc",
+  "level": 3,
+  "evaluator": "_sem_phyllotaxis",
+  "raw_golden": 1.0,
+  "instrumented": true,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Compound Eye",
+  "level": 1,
+  "evaluator": "_sem_compound_eye",
+  "raw_golden": 1.0,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Compound Eye",
+  "level": 2,
+  "evaluator": "_sem_compound_eye",
+  "raw_golden": 1.0,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Compound Eye",
+  "level": 3,
+  "evaluator": "_sem_compound_eye",
+  "raw_golden": 1.0,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Diatom Frustule",
+  "level": 1,
+  "evaluator": "_sem_diatom",
+  "raw_golden": 0.88,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Diatom Frustule",
+  "level": 2,
+  "evaluator": "_sem_diatom",
+  "raw_golden": 0.88,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Diatom Frustule",
+  "level": 3,
+  "evaluator": "_sem_diatom",
+  "raw_golden": 0.88,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Honeycomb Lattice",
+  "level": 1,
+  "evaluator": "_sem_honeycomb",
+  "raw_golden": 0.9476,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Honeycomb Lattice",
+  "level": 2,
+  "evaluator": "_sem_honeycomb",
+  "raw_golden": 0.9991,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Honeycomb Lattice",
+  "level": 3,
+  "evaluator": "_sem_honeycomb",
+  "raw_golden": 0.9995,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Armillary Sphere",
+  "level": 1,
+  "evaluator": "_sem_radiolarian",
+  "raw_golden": 1.0,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Armillary Sphere",
+  "level": 2,
+  "evaluator": "_sem_radiolarian",
+  "raw_golden": 1.0,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Armillary Sphere",
+  "level": 3,
+  "evaluator": "_sem_radiolarian",
+  "raw_golden": 1.0,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Vertebral Column",
+  "level": 1,
+  "evaluator": "_sem_vertebral",
+  "raw_golden": 0.9981,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Vertebral Column",
+  "level": 2,
+  "evaluator": "_sem_vertebral",
+  "raw_golden": 0.9989,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Vertebral Column",
+  "level": 3,
+  "evaluator": "_sem_vertebral",
+  "raw_golden": 0.9993,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Flanged Pipe Joint",
+  "level": 1,
+  "evaluator": "_sem_flanged_pipe",
+  "raw_golden": 0.9625,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Flanged Pipe Joint",
+  "level": 2,
+  "evaluator": "_sem_flanged_pipe",
+  "raw_golden": 0.9625,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Flanged Pipe Joint",
+  "level": 3,
+  "evaluator": "_sem_flanged_pipe",
+  "raw_golden": 0.9625,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Ball Bearing Assembly",
+  "level": 1,
+  "evaluator": "_sem_ball_bearing",
+  "raw_golden": 1.0,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Ball Bearing Assembly",
+  "level": 2,
+  "evaluator": "_sem_ball_bearing",
+  "raw_golden": 1.0,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Ball Bearing Assembly",
+  "level": 3,
+  "evaluator": "_sem_ball_bearing",
+  "raw_golden": 1.0,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Clock Tower Mechanism",
+  "level": 1,
+  "evaluator": "_sem_engineering",
+  "raw_golden": 0.9985,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Clock Tower Mechanism",
+  "level": 2,
+  "evaluator": "_sem_engineering",
+  "raw_golden": 0.9995,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Clock Tower Mechanism",
+  "level": 3,
+  "evaluator": "_sem_engineering",
+  "raw_golden": 0.9998,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Gantry Crane Assembly",
+  "level": 1,
+  "evaluator": "_sem_engineering",
+  "raw_golden": 0.925,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Gantry Crane Assembly",
+  "level": 2,
+  "evaluator": "_sem_engineering",
+  "raw_golden": 0.925,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Gantry Crane Assembly",
+  "level": 3,
+  "evaluator": "_sem_engineering",
+  "raw_golden": 0.925,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Cochlear Spiral",
+  "level": 1,
+  "evaluator": "_sem_engineering",
+  "raw_golden": 0.925,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Cochlear Spiral",
+  "level": 2,
+  "evaluator": "_sem_engineering",
+  "raw_golden": 0.925,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Cochlear Spiral",
+  "level": 3,
+  "evaluator": "_sem_engineering",
+  "raw_golden": 0.925,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Radiolarian Skeleton",
+  "level": 1,
+  "evaluator": "_sem_engineering",
+  "raw_golden": 0.925,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Radiolarian Skeleton",
+  "level": 2,
+  "evaluator": "_sem_engineering",
+  "raw_golden": 0.925,
+  "instrumented": false,
+  "failing_subchecks": {}
+ },
+ {
+  "family": "Radiolarian Skeleton",
+  "level": 3,
+  "evaluator": "_sem_engineering",
+  "raw_golden": 0.925,
+  "instrumented": false,
+  "failing_subchecks": {}
+ }
+]
