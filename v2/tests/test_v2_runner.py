@@ -333,3 +333,34 @@ def test_registry_entries_are_complete():
         if e["spec"].startswith("anthropic:claude-opus-5") or e["spec"].startswith(("anthropic:claude-sonnet-5",
                                                                                     "anthropic:claude-fable")):
             assert e["send_temperature"] is False, name       # these APIs return 400 for sampling parameters
+
+
+# ---------------------------------------------------------------------------
+# smoke mode and the analysis pipeline, end to end on mock models
+# ---------------------------------------------------------------------------
+def test_smoke_mode_passes_on_a_correct_mock():
+    import shutil
+    d = ROOT / "runs" / "selftest_pytest_smoke"
+    shutil.rmtree(d, ignore_errors=True)
+    rc = RUN.main(["--profile", "mock-reference", "--arms", "json,tool,schema,probe,repair_verifier", "--smoke",
+                   "--run", d.name, "--workers", "4"])
+    assert rc == 0
+
+
+def test_analysis_pipeline_end_to_end_on_mock(tmp_path):
+    import shutil
+    from analysis import make_all
+    d = ROOT / "runs" / "selftest_pytest_analysis"
+    shutil.rmtree(d, ignore_errors=True)
+    fams = "Spiral Staircase,Planetary Array,Cannonball Pyramid,DNA Helix"
+    RUN.main(["--profile", "mock-noisy", "--profile", "mock-reference", "--arms",
+              "json,neutral,tool,v1,mates,schema,probe", "--families", fams, "--k", "2", "--run", d.name, "--workers", "8"])
+    RUN.main(["--profile", "mock-noisy", "--profile", "mock-reference", "--arms", "repair_generic,repair_verifier",
+              "--families", fams, "--run", d.name, "--workers", "8"])
+    make_all.main(["--runs", d.name, "--out", str(tmp_path)])
+    for name in ("a01_overview", "a02_attribution", "a03_generalization", "a04_repair", "a05_validity"):
+        assert (tmp_path / f"{name}.md").exists(), name
+    tex = (tmp_path / "paper_numbers.tex").read_text()
+    assert "\\newcommand{\\ExactJsonMockreference}{100.0}" in tex
+    a02 = json.loads((tmp_path / "a02_attribution.json").read_text())
+    assert "tool-json" in a02["contrasts"] and a02["probe"]

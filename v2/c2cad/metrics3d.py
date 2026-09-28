@@ -196,3 +196,46 @@ def orientation_error(ref: list[Shape], out: list[Shape], amap: dict) -> float:
         d = abs(float(a.direction @ b.direction))
         errs.append(math.degrees(math.acos(min(1.0, d))))
     return float(np.mean(errs)) if errs else float("nan")
+
+
+def _obb(s: Shape):
+    """(axes as rows, extents) of a part's oriented bounding box; None for a sphere (no orientation)."""
+    if s.type == "sphere":
+        return None
+    if s.type == "box":
+        return np.eye(3), np.asarray(s.size, float)
+    if s.type == "beam":
+        u, v, w = _beam_frame(s)
+        return np.stack([u, v, w]), np.array([s.length, s.thickness, s.width])
+    a = s.axis / np.linalg.norm(s.axis)
+    b, c = _perp(a)
+    if s.type == "torus":
+        d = 2 * (s.ring_radius + s.tube_radius)
+        return np.stack([a, b, c]), np.array([2 * s.tube_radius, d, d])
+    r = {"cylinder": s.radius, "pipe": s.outer_radius, "cone": max(s.base_radius, s.top_radius)}[s.type]
+    return np.stack([a, b, c]), np.array([s.height, 2 * r, 2 * r])
+
+
+def principal_axis(axes, ext, rel: float = 0.02):
+    """The box axis whose extent is most distinct from the other two; None when all three agree within rel."""
+    gaps = [min(abs(ext[i] - ext[j]) for j in range(3) if j != i) / max(float(ext.max()), 1e-9) for i in range(3)]
+    i = int(np.argmax(gaps))
+    return None if gaps[i] < rel else axes[i]
+
+
+def orientation_error_obb(ref: list[Shape], out: list[Shape], amap: dict) -> float:
+    """Mean line angle (deg) between the principal axes of matched parts' oriented bounding boxes.
+
+    Defined for every matched pair whatever the primitive types (spheres and cube-like parts excepted), so an
+    oriented beam answered by an axis-aligned box counts as the orientation error it is. The rebuttal's
+    orientation measure used axes only and so excluded exactly that failure."""
+    errs = []
+    for i, j in amap.items():
+        A, B = _obb(ref[i]), _obb(out[j])
+        if A is None or B is None:
+            continue
+        pa, pb = principal_axis(*A), principal_axis(*B)
+        if pa is None or pb is None:
+            continue
+        errs.append(math.degrees(math.acos(min(1.0, abs(float(pa @ pb))))))
+    return float(np.mean(errs)) if errs else float("nan")

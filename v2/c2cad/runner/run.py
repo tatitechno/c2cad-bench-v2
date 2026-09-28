@@ -438,7 +438,6 @@ def main(argv=None):
     fams = None if a.families == "all" else set(a.families.split(","))
     cs = load_cases(a.split, fams, levels)
     run_dir = ROOT / "runs" / a.run
-    run_dir.mkdir(parents=True, exist_ok=True)
     runner = Runner(a, run_dir, models)
     single = [x for x in arms if x in A.SINGLE_TURN_ARMS]
     repair = [x for x in arms if x in A.REPAIR_ARMS]
@@ -474,6 +473,7 @@ def main(argv=None):
         return 0
     if missing:
         sys.exit(f"missing API keys for: {missing}")
+    run_dir.mkdir(parents=True, exist_ok=True)
     manifest = {"run": a.run, "started_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
                 "split": a.split, "models": {mc.name: {"spec": mc.spec, "entry": mc.entry, "settings": mc.settings.record(),
                                                        "output_cap": mc.output_cap, "headroom": mc.headroom}

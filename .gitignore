@@ -36,7 +36,7 @@ showcase_golden.json
 showcase_llm.json
 
 # Throwaway mock/self-test runs (real experiment runs are committed deliberately)
-v2/runs/selftest*/
+v2/runs/selftest*
 
 # local CAD toolchain for the format arms (CadQuery/OCP)
 v2/.venv-cad/

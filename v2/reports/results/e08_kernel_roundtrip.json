@@ -1,0 +1,1217 @@
+{
+ "kernel": {
+  "primitives": 5042,
+  "valid_solids": 5042,
+  "unrecognized": 0,
+  "prisms": 2502,
+  "type:cylinder": 689,
+  "type:beam": 2265,
+  "type:sphere": 1160,
+  "type:box": 237,
+  "type:pipe": 160,
+  "type:torus": 85,
+  "type:cone": 446
+ },
+ "cases": [
+  {
+   "case_id": "spiral_staircase_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999948238937,
+   "geometry_equiv": 99.99999948238937,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 11,
+    "n_solids": 11,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 10,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "spiral_staircase_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999939267465,
+   "geometry_equiv": 99.99999939267465,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 25,
+    "n_solids": 25,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 24,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "spiral_staircase_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999940457765,
+   "geometry_equiv": 99.99999940457765,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 51,
+    "n_solids": 51,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 50,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "cannonball_pyramid_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 10,
+    "n_solids": 10,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "cannonball_pyramid_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 20,
+    "n_solids": 20,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "cannonball_pyramid_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 35,
+    "n_solids": 35,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "voxel_grid_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 8,
+    "n_solids": 8,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 8,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "voxel_grid_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 27,
+    "n_solids": 27,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 27,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "voxel_grid_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 64,
+    "n_solids": 64,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 64,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "domino_ring_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.9999999999586,
+   "geometry_equiv": 99.9999999999586,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 15,
+    "n_solids": 15,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 5,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "domino_ring_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.9999999999586,
+   "geometry_equiv": 99.9999999999586,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 30,
+    "n_solids": 30,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 10,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "domino_ring_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999987347361,
+   "geometry_equiv": 99.99999987347361,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 60,
+    "n_solids": 60,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 20,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "dna_helix_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999999997749,
+   "geometry_equiv": 99.99999999997749,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 15,
+    "n_solids": 15,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 5,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "dna_helix_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999999997749,
+   "geometry_equiv": 99.99999999997749,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 30,
+    "n_solids": 30,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 10,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "dna_helix_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999999997749,
+   "geometry_equiv": 99.99999999997749,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 60,
+    "n_solids": 60,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 20,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "flanged_pipe_joint_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 12,
+    "n_solids": 12,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "flanged_pipe_joint_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 20,
+    "n_solids": 20,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "flanged_pipe_joint_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 36,
+    "n_solids": 36,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "suspension_bridge_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999883241262,
+   "geometry_equiv": 99.99999883241262,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 13,
+    "n_solids": 13,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 11,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "suspension_bridge_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999934005265,
+   "geometry_equiv": 99.99999934005265,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 23,
+    "n_solids": 23,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 21,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "suspension_bridge_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999939739531,
+   "geometry_equiv": 99.99999939739531,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 43,
+    "n_solids": 43,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 41,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "planetary_array_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 7,
+    "n_solids": 7,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "planetary_array_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 13,
+    "n_solids": 13,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "planetary_array_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 19,
+    "n_solids": 19,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "cross_braced_truss_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999873498099,
+   "geometry_equiv": 99.99999873498099,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 24,
+    "n_solids": 24,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 24,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "cross_braced_truss_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999860400143,
+   "geometry_equiv": 99.99999860400143,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 48,
+    "n_solids": 48,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 48,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "cross_braced_truss_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999840753219,
+   "geometry_equiv": 99.99999840753219,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 96,
+    "n_solids": 96,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 96,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "fractal_y_tree_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999999998244,
+   "geometry_equiv": 99.99999999998244,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 7,
+    "n_solids": 7,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 7,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "fractal_y_tree_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999938920939,
+   "geometry_equiv": 99.99999938920939,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 15,
+    "n_solids": 15,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 15,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "fractal_y_tree_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999970445616,
+   "geometry_equiv": 99.99999970445616,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 31,
+    "n_solids": 31,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 31,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "bcc_lattice_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999933895552,
+   "geometry_equiv": 99.99999933895552,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 99,
+    "n_solids": 99,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 64,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "bcc_lattice_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999939480767,
+   "geometry_equiv": 99.99999939480767,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 307,
+    "n_solids": 307,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 216,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "bcc_lattice_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999946988974,
+   "geometry_equiv": 99.99999946988974,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 701,
+    "n_solids": 701,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 512,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "ball_bearing_assembly_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 8,
+    "n_solids": 8,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "ball_bearing_assembly_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 14,
+    "n_solids": 14,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "ball_bearing_assembly_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 22,
+    "n_solids": 22,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "furniture_assembly_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 5,
+    "n_solids": 5,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 1,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "furniture_assembly_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 7,
+    "n_solids": 7,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 1,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "furniture_assembly_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 9,
+    "n_solids": 9,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 1,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "pipe_manifold_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 12,
+    "n_solids": 12,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 3,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "pipe_manifold_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 16,
+    "n_solids": 16,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 4,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "pipe_manifold_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 24,
+    "n_solids": 24,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 6,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "axle_bearing_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 5,
+    "n_solids": 5,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 1,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "axle_bearing_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 5,
+    "n_solids": 5,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 1,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "axle_bearing_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 5,
+    "n_solids": 5,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 1,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "armillary_sphere_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999838778366,
+   "geometry_equiv": 99.99999838778366,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 20,
+    "n_solids": 20,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "armillary_sphere_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999820998607,
+   "geometry_equiv": 99.99999820998607,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 36,
+    "n_solids": 36,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "armillary_sphere_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999814162243,
+   "geometry_equiv": 99.99999814162243,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 52,
+    "n_solids": 52,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "clock_tower_mechanism_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999999982981,
+   "geometry_equiv": 99.99999999982981,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 12,
+    "n_solids": 12,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 6,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "clock_tower_mechanism_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999999974946,
+   "geometry_equiv": 99.99999999974946,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 20,
+    "n_solids": 20,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 14,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "clock_tower_mechanism_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999976264485,
+   "geometry_equiv": 99.99999976264485,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 32,
+    "n_solids": 32,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 26,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "gantry_crane_assembly_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999977678215,
+   "geometry_equiv": 99.99999977678215,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 17,
+    "n_solids": 17,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 8,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "gantry_crane_assembly_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.9999998482057,
+   "geometry_equiv": 99.9999998482057,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 25,
+    "n_solids": 25,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 12,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "gantry_crane_assembly_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999988499965,
+   "geometry_equiv": 99.99999988499965,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 33,
+    "n_solids": 33,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 16,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "phyllotaxis_disc_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 22,
+    "n_solids": 22,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "phyllotaxis_disc_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 56,
+    "n_solids": 56,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "phyllotaxis_disc_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 90,
+    "n_solids": 90,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "compound_eye_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.9999999936698,
+   "geometry_equiv": 99.9999999936698,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 60,
+    "n_solids": 60,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "compound_eye_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999959203875,
+   "geometry_equiv": 99.99999959203875,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 114,
+    "n_solids": 114,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "compound_eye_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999999207334,
+   "geometry_equiv": 99.99999999207334,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 186,
+    "n_solids": 186,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 0,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "diatom_frustule_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 72,
+    "n_solids": 72,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 4,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "diatom_frustule_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 120,
+    "n_solids": 120,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 4,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "diatom_frustule_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 100.0,
+   "geometry_equiv": 100.0,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 168,
+    "n_solids": 168,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 4,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "honeycomb_lattice_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999980543302,
+   "geometry_equiv": 99.99999980543302,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 41,
+    "n_solids": 41,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 18,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "honeycomb_lattice_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999984966328,
+   "geometry_equiv": 99.99999984966328,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 107,
+    "n_solids": 107,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 48,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "honeycomb_lattice_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999973891673,
+   "geometry_equiv": 99.99999973891673,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 209,
+    "n_solids": 209,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 96,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "vertebral_column_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999994679179,
+   "geometry_equiv": 99.99999994679179,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 40,
+    "n_solids": 40,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 21,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "vertebral_column_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999994135668,
+   "geometry_equiv": 99.99999994135668,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 70,
+    "n_solids": 70,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 36,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "vertebral_column_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.9999999804995,
+   "geometry_equiv": 99.9999999804995,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 112,
+    "n_solids": 112,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 57,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "cochlear_spiral_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999979663066,
+   "geometry_equiv": 99.99999979663066,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 28,
+    "n_solids": 28,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 24,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "cochlear_spiral_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999954690401,
+   "geometry_equiv": 99.99999954690401,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 52,
+    "n_solids": 52,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 48,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "cochlear_spiral_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999973988729,
+   "geometry_equiv": 99.99999973988729,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 76,
+    "n_solids": 76,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 72,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "radiolarian_skeleton_level_1",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999958564266,
+   "geometry_equiv": 99.99999958564266,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 55,
+    "n_solids": 55,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 30,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "radiolarian_skeleton_level_2",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.9999996031944,
+   "geometry_equiv": 99.9999996031944,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 205,
+    "n_solids": 205,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 120,
+    "n_multi_solid_items": 0
+   }
+  },
+  {
+   "case_id": "radiolarian_skeleton_level_3",
+   "exec": "ok",
+   "exact": true,
+   "geometry": 99.99999955790044,
+   "geometry_equiv": 99.99999955790044,
+   "semantic": 100.0,
+   "stats": {
+    "n_items": 805,
+    "n_solids": 805,
+    "n_invalid": 0,
+    "n_unrecognized": 0,
+    "n_prisms": 480,
+    "n_multi_solid_items": 0
+   }
+  }
+ ]
+}
