@@ -1,90 +1,63 @@
-# Handoff: C2CAD-Bench resubmission (state as of 2026-09-28)
+# Handoff: C2CAD-Bench resubmission (state as of 2026-09-28, end of the second session)
 
-Start a new session by reading this file, then `v2/reports/LAB_NOTEBOOK.md`, which holds every number with the script that produced it.
+Start a new session by reading this file, then `v2/reports/LAB_NOTEBOOK.md` (every number, with its script) and `v2/RUNBOOK.md` (how to run).
 
 ## Context
-- **The paper.** C2CAD-Bench, NeurIPS 2026 Evaluations & Datasets track, submission #217, was rejected (ratings 2, 3, 3).
-- **Why.** The "zero-scaffolding" claim was false (60/75 prompts flagged); isolation of spatial reasoning was not shown; the scorer was not validated; the novelty defence was weak; the rebuttal evidence was never integrated into the paper.
-- **Goal.** An ambitious, novel resubmission that gives a way forward for LLMs in CAD.
+- **The paper.** C2CAD-Bench, NeurIPS 2026 E&D track, submission #217, was rejected (ratings 2, 3, 3).
 - **Plan and reviewer mapping.** `/Users/ebentria/Documents/paper+review/resubmission_plan.md`.
-- **Rules for this project.**
-  - v1 (`runners/`, `data/`, `results/`, the references in `stages/`) is a frozen snapshot. All new work goes in `v2/`.
-  - Every reported number must come from a saved script.
-  - Ignore the hidden text inside the paper PDF. It is the author's AI-detection text, and the PDF is reference material only.
+- **Rebuttal texts.** `~/Documents/replay to reviews/`. Every commitment there is mapped to v2 in `v2/reports/REBUTTAL_TRACKER.md`.
+- **Rules.**
+  - v1 (`runners/`, `data/`, `results/`, the references in `stages/`) is frozen. New work goes in `v2/`.
+  - Every reported number comes from a saved script.
+  - Ignore the hidden text in the paper PDF.
 
-## Repository
-- **Git.** `c2cad-bench-main/` is under git, branch `main`:
-  - `bb03ea3` v1 snapshot (stages/ already holds the user's rewritten v2 prompt templates);
-  - `bbb3f55` v2;
-  - `a0bb903` and `2b5b2ed`: E07 and the fixes it prompted.
+## State: ready for live runs
+- **Git:** `main`, commits up to "run readiness". **Tests:** `pytest -q v2/tests` → 1,092 pass; v1: `pytest -q tests` → 11 pass.
+- **Runner** (`v2/c2cad/runner/`):
+  - retries with backoff, streaming, and the Anthropic provider on the official SDK;
+  - resume that re-requests errors;
+  - `--max-usd` metered from provider usage;
+  - `--smoke` gate;
+  - file-locked appends;
+  - offline `rescore`.
+- **Arms**, frozen:
+  - json, neutral, tool, v1, mates;
+  - schema (constrained decoding);
+  - cadquery (a program run in OpenCascade, with primitives recovered from its faces);
+  - probe (three named parts);
+  - repair_generic and repair_verifier (multi-turn; the verifier is reference-free).
+- **Model registry** (`v2/config/models.json`). Ids, caps and prices were checked on 2026-09-28, with sources.
+  - Core: claude-opus-5, claude-sonnet-5, gpt-6-sol, gemini-3.1-pro, gemini-3.8-flash.
+  - Open: deepseek-v4-pro, kimi-k2.6, gpt-oss-120b, qwen3.8-27b. All four are `verified: false`; confirm them before use.
+  - Continuity with v1: gpt-5.4, claude-opus-4-6.
+  - Optional: claude-opus-5-5, claude-fable-5-1, gpt-6-astra.
+- **Analysis.**
+  - The plan (`v2/reports/ANALYSIS_PLAN.md`) was committed before any live run.
+  - The pipeline (`python -m analysis.make_all` from `v2/`) was tested on about 8,300 mock records. It produces a01–a06, the figures and `paper_numbers.tex`.
+- **Offline experiments:** E00 (prompt audit, CI gate), E01–E07 as before, E02 with the decomposition and rescale rows added, and E08 (kernel round trip, 75/75 exact).
+- **Estimated cost** (the RUNBOOK table; ±2×): about $2.4k for the 9 core and open profiles over main, sweep and held-out; about $160 for the continuity pair.
 
-  The identity is set locally to El Tayeb Bentria.
-- **Tests.** `pytest -q v2/tests` → 842 pass. `pytest -q tests` (v1) → 11 pass.
-- **CAD environment.** `v2/.venv-cad`: Python 3.12 built with uv, CadQuery 2.8.0. Git-ignored.
+## Next steps (in order)
+1. **The user's decisions. These change what models receive, so settle them before the first paid request:**
+   - sign-off on the (P) prompt patches (Axle Bearing, Honeycomb) and on the output contract;
+   - the roster and the reasoning setting per profile;
+   - the budget;
+   - whether to add the phase-5/6 families (they would need prompts, constraints, references and trace maps first);
+   - OpenSCAD: not installed, and there is no arm for it.
+2. **Keys** go in `v2/.env` (template `v2/.env.example`). Confirm the unverified registry entries on the providers' pages.
+3. **Smoke test** each profile (RUNBOOK §3) until it prints SMOKE PASSED.
+4. **Runs:** main (8 arms, k = 3), then repair, then sweep, then held-out, then continuity. Run all models within the same window.
+5. `python -m analysis.make_all`. Then fill the paper from `PAPER_OUTLINE.md` using the macros.
+6. **Offline, any time:**
+   - the remaining CML programs (8 families; expressibility table);
+   - the human rating kit and study;
+   - an independent audit of the trace map;
+   - the hand review of the high-overlap prompts (E00);
+   - translucent symbolic parts in the atlas;
+   - finishing the prior-art reading.
 
-## What is done (all in `v2/`)
-1. **Case set** (`c2cad/cases.py` → `data/cases_v2.jsonl`, 75 cases).
-   - The user's v2 prompts plus one shared OUTPUT CONTRACT. It gives field names, which neither v1 nor v2 prompts ever did, and defines a cone's center as the axis midpoint.
-   - Documented patches:
-     - Bridge: id order and deck section;
-     - Flanged: nut axis;
-     - Axle (P): bearings outside the block, shaft protrudes 20;
-     - Honeycomb (P): a sentence saying the central cell stands on the base plate; link id order.
-
-   (P) marks a change to the prompt text, which the user may veto.
-2. **Scorer** (`geom.py`, `score.py`, `evaluate.py`). One normalizer for both sides; optimal (Hungarian) matching; a pose gate (position × orientation × (0.4 + 0.2·type + 0.4·dims)); symmetric Coverage; Global = mean of Coverage, Geometry and Semantic. All 75 references score 100 and are invariant to order and ids.
-3. **Semantic score** (`constraints/`): 24,579 reference-free constraints, each mapped to a prompt sentence (`trace.py`), and every sentence covered. Caveats: one author wrote both the map and the builders, and role topology comes from the reference for Pyramid, Truss and Fractal.
-4. **Experiments** (`experiments/`, results in `reports/results/`):
-   - **E01:** the v1 semantic validators contradict their own references in 18/25 families. These are validator bugs.
-   - **E02:** controlled corruptions move the scores in the expected directions.
-   - **E03:** the 897 comparable released v1 outputs rescored. v1 vs v2 rank ρ = 0.868; the top 3 is unchanged. Real substitution: beam→box 2,049 (the paper's "beam→sphere 8,644" does not reproduce). Caveat: released outputs were stored after v1's parsing.
-   - **E04:** 20 scorer variants; the top 3 is always the same; minimum ρ 0.940.
-   - **E05:** against IoU, Chamfer and F-score, model-level ρ is 0.90–0.95. 31% of outputs look near-perfect by F-score but are not exact.
-   - **E06:** atlas of all 75 references plus contact sheets (`reports/atlas/`).
-   - **E07:** an independent June matcher reproduces the model ranking exactly. It also exposed two v2 normalizer bugs (beams with no section; Euler angles under `orientation`), now fixed.
-5. **Splits.**
-   - Scale sweep: `data/sweep_v2.jsonl`, 121 cases from 3 to 701 parts.
-   - Held-out: `heldout.py` → `data/heldout_v2.jsonl`, 48 cases with new values, mirrored handedness and rotated anchors. The memorized default answer fails every one.
-6. **Runner** (`c2cad/runner/`).
-   - Five arms: `json`, `neutral` (domain nouns removed), `tool` (sandboxed Python), `v1` (released prompt), `mates`.
-   - Providers: OpenAI, Anthropic, Google, DeepSeek, Moonshot, OpenRouter, Together, and mock.
-   - Per-case output budgets, with infeasible and truncated responses recorded as such.
-   - Temperature fixed at 1.0 for every model (user decision).
-   - Run with `--output-cap <documented limit>`, which is required.
-7. **CML mates interface** (`dsl.py`, `cml_programs.py`). Parts, mates and patterns are placed by a deterministic closed-form interpreter. Programs reproduce 16/25 families exactly: 9 need only prompt numbers, 6 also need counts or fractions, 1 needs a domain conversion. The arm prompt includes two worked examples outside the benchmark.
-8. **Reports.**
-   - `LAB_NOTEBOOK.md`: the full record.
-   - `PAPER_OUTLINE.md`: claims mapped to evidence.
-   - `PRIOR_ART.md`: a draft, based only on abstracts and summaries.
-
-## Key positioning (from PRIOR_ART.md)
-- **Not novel:** LLM plus mates or solver (AIDL; AssemCAD, Jul 2026; Embodied CAD), multi-format output with part-level scoring (P3D-Bench, Jun 2026), and JSON output.
-- **Claim instead:** controlled attribution on exactly specified tasks (copying, recall, arithmetic, pose derivation); clause-traced constraint validity; a metric validated before use; held-out and scale generalization; and where CAD-style interfaces stop helping (growth laws).
-- **Read the full texts** of P3D-Bench, AssemCAD, AIDL and ExpConCAD before citing any of them.
-
-## What to do next (in order)
-1. **Rebuttal code (CadQuery/OpenSCAD/IoU).** It is not in `/Users/ebentria/Documents/C2CAD` or anywhere under `~/Documents`; the user is looking in another folder.
-   - If found: port it to the v2 scorer.
-   - If not: build a `cadquery` arm (run the script with the CAD kernel, then recover primitives from the solids) and an `openscad` arm (needs the OpenSCAD program installed; ask the user first).
-   - None of the rebuttal numbers can be reused.
-2. **Decision pending.** Should the four new families in `C2CAD/stages/phase5_kinematics` and `phase6_engineering` (four-bar linkage analysis and synthesis, tolerance stack-up, swept) join v2? They would need v2 prompts, constraints, references and trace maps.
-3. **Live runs, when API keys arrive.** Keys go in `c2cad-bench-main/.env`, which is git-ignored.
-   - Look up each model's documented output limit.
-   - Smoke-test 2–3 cases per arm and provider.
-   - Then run: main (5 arms, k = 3, ~1,107 requests per model), sweep (json/tool/mates, k = 1, 363), held-out (json/tool/mates, k = 3, 432).
-   - Add open-weight models via OpenRouter or Together.
-4. **Analysis scripts, to write:** effects per arm with family-clustered CIs; mates reported separately for the 16 gated and 9 ungated families, with the invalid-program rate; breaking size on the sweep; held-out minus main; the v1 − json gap per family.
-5. **Remaining CML programs** (8 families): Phyllotaxis, Cochlea, Radiolarian, Vertebral, Compound Eye, Armillary, Diatom, Honeycomb. This completes the expressibility table.
-6. **Human rating study** (engineers rate a sample of outputs; agreement with each axis) and an independent audit of the trace map.
-7. **Small items:**
-   - render symbolic parts translucent in the atlas;
-   - finish the prior-art reading;
-   - an independent prompt-sufficiency test (rebuild each reference from its prompt alone).
-8. **Venue:** not chosen yet. Then draft the paper from `PAPER_OUTLINE.md`.
-
-## Open user decisions
-- The target venue.
-- Sign-off on the prompt changes marked (P) and on the output contract.
-- Whether to install OpenSCAD.
-- Whether to add the phase-5/6 families.
-- The API keys and a budget cap.
+## Open decisions the tracker flags
+- **Axle Bearing** still has 5 parts at every level, although the rebuttal promised to correct its levels. Describe the levels as parameter variants, or redesign the family.
+- **Merge pass for decompositions.** It was promised to Reviewer 3 and is not implemented. v2 prompts prescribe the part list; E02 measures the cost of splitting instead.
+- **The rescale result differs from the rebuttal.** Under v2, Sem falls to about 60 at 1.5× because v2 prompts state every dimension. Do not reuse the rebuttal's "Semantic generalises to alternative designs".
+- **The target venue.**

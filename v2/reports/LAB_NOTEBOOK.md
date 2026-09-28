@@ -13,7 +13,13 @@ Layout:
 | `v2/c2cad/evaluate.py` | One evaluation entry point |
 | `v2/c2cad/stats.py` | Family-clustered bootstrap |
 | `v2/experiments/eNN_*.py` | One script per experiment |
-| `v2/tests/test_v2_validity.py` | validity tests (`pytest -q v2/tests`; 842 at the last update) |
+| `v2/c2cad/runner/` | Live-run machinery: providers, arms, sandbox, mock, runner, offline rescore |
+| `v2/c2cad/cadkernel.py`, `cadcode.py`, `prism.py` | CAD-kernel bridge (converter, B-Rep recovery), CadQuery emitter, reading of label-free prisms |
+| `v2/c2cad/partlevel.py` | Named-part metrics (probe arm) |
+| `v2/config/models.json` | Model registry: ids, output caps, reasoning settings, prices, verification status |
+| `v2/analysis/` | Pre-registered analysis (`reports/ANALYSIS_PLAN.md`), `python -m analysis.make_all` |
+| `v2/RUNBOOK.md` | How to run everything, with the cost table |
+| `v2/tests/` | `test_v2_validity.py` (scorer) and `test_v2_runner.py` (runner, arms, kernel, analysis); `pytest -q v2/tests` → 1,092 passed at the last update |
 
 ---
 
@@ -278,13 +284,90 @@ Built by: `v2/c2cad/heldout.py` → `v2/data/heldout_v2.jsonl`
 - Multi-format output with part-level scoring already exists (P3D-Bench, Jun 2026).
 - **Claim instead:** the controlled attribution on exactly specified tasks, the clause-traced constraints, the metric validity evidence, held-out and scale generalization, and the map of where CAD-style interfaces stop helping.
 
+## Run readiness (2026-09-28, second session)
+
+The rebuttal commitments were read in full (the four OpenReview posts and the long `.docx` response in `~/Documents/replay to reviews/`). Every one is mapped to v2 in `reports/REBUTTAL_TRACKER.md`. The rebuttal's own code was not in that folder (it holds a copy of the v1 repository only), so its CadQuery and IoU pipeline was rebuilt (E08, a05).
+
+### E00. Prompt scaffolding audit (a saved script for the outline's numbers)
+Script: `v2/experiments/e00_prompt_audit.py` → `results/e00_prompt_audit.md`
+- **Regex flags.** The released v1 regexes flag 60/75 v1 prompts (48 shape count, 27 coordinate vector, 9 formula or assignment, 18 trig or Cartesian). They flag 0/75 v2 task texts, and 0/75 for the task-specific text of every v2 arm.
+- **Shared instruction blocks** are audited once:
+  - the output contract matches only through the literal `{"shapes": [...]}`;
+  - the CadQuery instruction matches only through `parts[0]`;
+  - the mates reference contains coordinate vectors in its two worked examples, which lie outside the benchmark.
+
+  None of these is a task value.
+- **Verbatim coordinate overlap**, counted by occurrence: 22.7% for v1 and 13.2% for v2. Counted by distinct value per case: 10.5% and 7.2%.
+  - Highest in v2: Gantry 71.4%, Pipe Manifold 51.2%, Suspension Bridge 50.0% and Honeycomb 40.8%. These still need the hand review.
+- **CI gate.** `tests/test_v2_runner.py::test_audit_gate_task_text_of_every_arm_has_no_scaffolding_flag`.
+
+### E02 additions: decomposition and rescale (Reviewer 3)
+Same script; the rows already in the table are unchanged.
+
+| rewrite of the reference | Cov | Geom | Sem | Global | exact % | dimension | mate | orientation | topology |
+|---|---|---|---|---|---|---|---|---|---|
+| split every box into two abutting halves | 93.9 | 94.6 | 95.4 | 94.6 | 68.0 | 97.6 | 88.0 | 100 | 100 |
+| split every beam into two collinear halves | 80.7 | 80.2 | 90.6 | 83.8 | 44.0 | 96.6 | 67.3 | 99.7 | 93.9 |
+| scale × 1.10 about the origin | 100 | 55.9 | 66.8 | 74.3 | 0 | 39.5 | 89.6 | 98.3 | 100 |
+| scale × 1.25 | 100 | 20.5 | 60.7 | 60.4 | 0 | 37.2 | 70.1 | 87.5 | 100 |
+| scale × 1.50 | 100 | 8.9 | 60.2 | 56.4 | 0 | 36.6 | 68.7 | 88.1 | 100 |
+
+- **The rescale result differs from the rebuttal.** The rebuttal reported Sem ≈ 99 at 1.5× under v1. Under v2, every prompt states its dimensions, so a rescaled answer really is wrong: dimension constraints fail (about 37%) while orientation and topology hold. The rebuttal's sentence "Semantic generalises to alternative valid designs" must not be reused as written.
+- **Decomposition.** Finer decompositions cost 5.4 points (boxes) and 16.2 (beams). v2 prompts prescribe each part and its id, so a split is a deviation from the specification.
+- **Open decision:** the merge pass promised to Reviewer 3 is not implemented (see the tracker).
+
+### E08. CAD-kernel round trip
+Script: `v2/experiments/e08_kernel_roundtrip.py` → `results/e08_kernel_roundtrip.md`
+- **Converter** (`c2cad/cadkernel.py`): 5,042 of 5,042 reference primitives build as valid OpenCascade solids, and all 5,042 are recovered from their B-Rep faces.
+  - The prisms among them (2,502) come back label-free.
+  - By type: beam 2,265, box 237, cone 446, cylinder 689, pipe 160, sphere 1,160, torus 85.
+- **The full cadquery-arm path** (program → sandbox → kernel → recovery → evaluator) gives 75/75 cases exact. The lowest Geometry is 99.999998, which is rounding.
+- **Rule for label-free prisms** (`c2cad/prism.py`). A rectangular CAD solid carries no box/beam label and no centerline, so the evaluator takes the reading that best fits the reference: an axis-aligned box, or a beam along one of its three axes. The occupied volume is identical for every reading. This is the same principle as the geometry-equivalent view.
+  - Why it is needed: the two types cannot be told apart by shape. The Domino lintels are beams shorter than they are wide, and some Manifold boxes are 4.5:1.
+
+### Runner hardening (before any paid request)
+- **Resume.** Previously an `api_error` was never re-requested. Now only ok and infeasible responses count as done.
+- **Retries.** 408/409/425/429/5xx/529, connection errors and timeouts get exponential backoff that honours `retry-after`. Other 4xx errors are not retried.
+- **Streaming (SSE)** for every provider. The Anthropic path uses the official SDK. The idle timeout replaces the fixed 600 s request timeout.
+- **Temperature.** Claude Opus 5/5.5, Sonnet 5 and Fable 5.x return a 400 when sent a temperature. The registry flag `send_temperature` now omits it, and the record states that 1.0 was requested but not sent.
+- **Scoring is separate from requesting.** The paid response is written first, so a scoring crash is recorded as `harness_error` and nothing is lost. `python -m c2cad.runner.rescore` re-scores offline and reproduces the stored scores exactly (checked on 456 mock responses).
+- **Programs.** Any exception from a model-written CML program is that program's `invalid_program`, not a runner crash.
+- **Budget.** `--max-usd` is metered on the providers' own usage (hidden reasoning included) for the listed profiles.
+- **Concurrency.** Appends are file-locked. Three processes writing 900 lines of 200 KB concurrently left every line intact.
+- **Infeasible** now means that the answer alone cannot fit the cap. The reasoning reserve is cut back first.
+- **`--smoke`** sends the smallest and largest feasible case per arm and checks the finish reason, usage, returned model, parse and truncation.
+- **Model registry** (`config/models.json`): ids, output caps and prices checked on 2026-09-28, with the source of each.
+  - DeepSeek's `deepseek-chat` and `deepseek-reasoner` aliases were retired on 2026-07-24, according to third-party pages; the official docs refused the connection.
+  - The DeepSeek, Kimi and OpenRouter entries are marked `verified: false`.
+
+### New arms (frozen before the runs)
+| arm | design | rebuttal commitment |
+|---|---|---|
+| schema | the json prompt with provider-native JSON-schema decoding (OpenAI strict json_schema, Anthropic `output_config.format`, Google `responseJsonSchema`, OpenRouter with `require_parameters`). The enforcement actually used is recorded per response. A test checks that all 75 references validate against the schema | R1 and AC: constrained decoding |
+| cadquery | the prompt; the model writes CadQuery with one solid per id (`parts = {id: solid}`), which runs in `.venv-cad` under the same sandbox policy (plus a ban on CadQuery file I/O). Primitives are recovered from the faces. Unions and non-primitive solids are counted as unrecognised | R1, R2: the generator-side code-vs-JSON experiment |
+| probe | the prompt; the model returns only three named parts, fixed per case (middle id, last id, one seeded id). The same parts are scored inside every full answer, under id binding and under assignment binding | R1 W2: serialisation load |
+| repair_generic / repair_verifier | multi-turn. Seeds are non-exact json answers (sample 0). Up to 2 rounds of either "check and fix" or the reference-free verifier (`evaluate.verify`): constraints bound by the answer's own ids, violated prompt sentences quoted, missing ids and the part count listed, no reference coordinates. The verifier is silent on all 75 references (test) | R2: iterative refinement |
+
+### Analysis plan and pipeline
+- **The plan** (`reports/ANALYSIS_PLAN.md`) was committed before any live run. It covers:
+  - estimands and the handling of each response status;
+  - H1–H8 with decision rules;
+  - tiers and variance decomposition;
+  - breaking size, with infeasible and truncated responses censored;
+  - held-out gap and memorization index;
+  - validity on live outputs;
+  - v1 continuity.
+- **The pipeline** is `v2/analysis/` (a01–a06 plus figures), run as `python -m analysis.make_all`. It writes `paper_numbers.tex` macros. It was tested end to end on about 8,300 mock records: 3 mock models, every arm, main + sweep + held-out.
+
 ## Open items
 - [x] E04, E05 done (above).
-- [ ] Live runs of v2 prompts: need API keys and a budget from the user.
-- [ ] The rebuttal's CadQuery/OpenSCAD/IoU code is not in this repo; ask the user.
-- [x] Attribution arms, runner, sandbox, CML interpreter + gate (16/25 families).
+- [x] Runner, arms (json, neutral, tool, v1, mates, schema, cadquery, probe, repair_*), registry, smoke mode, analysis pipeline.
+- [x] The rebuttal's CadQuery and IoU code was rebuilt (E08, a05); OpenSCAD is not installed and has no arm (user decision).
 - [x] Atlas: `reports/atlas/` has 75 reference PNGs, 4 phase contact sheets, and the Staircase panel with its three levels and prompts.
+- [ ] Live runs (`RUNBOOK.md`): confirm the unverified registry entries, smoke each profile, then run main, repair, sweep and held-out.
+- [ ] Decisions: sign-off on the (P) patches and the contract; the Axle Bearing levels (still 5 parts each); the decomposition merge pass; the phase-5/6 families; the roster and reasoning settings; the budget.
 - [ ] Render symbolic parts translucent (Compound Eye's dome hides the units).
-- [ ] Remaining CML programs (8 families) to complete the expressibility table.
-- [ ] Human rating kit (sample, renders, form).
-- [ ] Paper outline and draft sections.
+- [ ] Remaining CML programs (8 families) to complete the expressibility table (offline; does not affect the runs).
+- [ ] Human rating kit (sample, renders, form) and an independent audit of the trace map.
+- [ ] Hand review of the high-overlap prompts (E00).
+- [ ] Paper draft from `PAPER_OUTLINE.md`.
