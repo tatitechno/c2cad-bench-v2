@@ -13,7 +13,7 @@ Layout:
 | `v2/c2cad/evaluate.py` | One evaluation entry point |
 | `v2/c2cad/stats.py` | Family-clustered bootstrap |
 | `v2/experiments/eNN_*.py` | One script per experiment |
-| `v2/tests/test_v2_validity.py` | 303 validity tests (`pytest -q v2/tests`) |
+| `v2/tests/test_v2_validity.py` | validity tests (`pytest -q v2/tests`; 842 at the last update) |
 
 ---
 
@@ -78,7 +78,7 @@ Documented patches. Each fixes a verified disagreement; the user may veto the on
 - **Global_v2** = mean(Cov, Geom, Sem). **exact** = every constraint satisfied and the part count exact.
 
 ## Validity checks (all pass)
-Script: `pytest -q v2/tests` → 378 passed
+Script: `pytest -q v2/tests` → 842 passed (at the time of the last notebook update)
 - 75/75 references score 100 on every axis.
 - 75/75 are invariant to shuffling and renumbering.
 - 24,579 constraints in total. Each has a clause, a kind and valid roles, and the reference satisfies all of them.
@@ -116,25 +116,28 @@ Script: `v2/experiments/e03_rescore_v1_outputs.py` → `results/e03_*.md`, `e03_
 
 Furniture and Axle are excluded because their v1 prompts said "choose the dimensions freely", leaving 897 outputs.
 
-- **Rankings.** Rank agreement between v1 Global and v2 Global is Spearman ρ = 0.797 (Kendall τ = 0.641).
-  - The top three are unchanged: gemini-3.1-pro 83.6 [74.4, 91.5], gpt-5.4 81.8 [74.6, 88.5] and gemini-2.5-pro 79.8 [71.7, 87.2], with P(top-3) of 98%, 97% and 98% under the family-clustered bootstrap.
-  - The middle reorders: gemini-3-flash moves from rank 10 to 4, gpt-4.1 from 4 to 7, deepseek-chat from 9 to 13.
-- **Exact assemblies** (every stated constraint met): from 4.3% (deepseek-chat) to 42.0% (gemini-2.5-pro).
-- **Co-located type substitutions**: beam→box 2,049 of 2,540 matched pairs, mostly in Truss (864), Staircase (573) and Clock (205); beam→sphere 237 (Radiolarian only); beam→pipe 106 (Honeycomb); cone→cylinder 91 (Compound Eye 80). The paper's "beam→sphere 8,644" does not reproduce.
+- **Rankings.** Rank agreement between v1 Global and v2 Global is Spearman ρ = 0.868 (Kendall τ = 0.718).
+  - The top three are unchanged: gemini-3.1-pro 84.1 [74.9, 91.9], gpt-5.4 82.2 [74.9, 89.0] and gemini-2.5-pro 81.5 [73.6, 88.6], with P(top-3) of 98%, 96% and 99% under the family-clustered bootstrap.
+  - The middle reorders: gemini-3-flash moves from rank 10 to 6, gpt-4.1 from 4 to 7, deepseek-chat from 9 to 11, deepseek-reasoner from 13 to 10.
+- **Exact assemblies** (every stated constraint met and the part count exact): from 4.3% (deepseek-chat) to 42.0% (gemini-2.5-pro).
+- **Co-located type substitutions:** beam→box 2,049 of 2,541 matched pairs, mostly in Truss (864), Staircase (573) and Clock (205); beam→sphere 237 (Radiolarian only); beam→pipe 106 (Honeycomb); cone→cylinder 91 (Compound Eye 80). The paper's "beam→sphere 8,644" does not reproduce.
+- **Hardest families**, by mean Global_v2 over all 975 outputs: Radiolarian 30.3, Axle 34.9 (excluded), Pipe Manifold 44.9, Furniture 52.0 (excluded), Compound Eye 52.1, Vertebral 54.0. Easiest: Planetary 97.2, Pyramid 94.8, Voxel 89.7.
+- *History:* before the E07 normalizer fixes, ρ was 0.797. The difference comes from parts v2 had wrongly discarded.
 
 ## E04. Sensitivity to every free scorer choice
 Script: `v2/experiments/e04_metric_sensitivity.py` → `results/e04_metric_sensitivity.md`
 
-17 variants were tested:
+20 variants were tested:
 - pair form (additive or pose-gated);
 - coverage form;
 - position tolerance at 2.5% or 10% of the diagonal;
 - orientation saturation at 15° or 90°;
 - constraint tolerances × 0.5, 2 or 5;
 - six weightings, including Geometry-only and Semantic-only;
-- all v1-like choices together.
+- all v1-like choices together;
+- three ways of grouping constraints into Sem.
 
-The top-3 set is the same in all 17. The lowest rank agreement with the default is Spearman ρ = 0.901 (Kendall τ = 0.744), for the additive pair form. The largest single move is 3 ranks (gemini-3-flash or gpt-4.1). This replaces the rebuttal's "32 configurations, ρ ≥ 0.95", which was computed with the buggy v1 scorer.
+The top-3 set is the same in all 20. The lowest rank agreement with the default is Spearman ρ = 0.940, and the lowest Kendall τ is 0.795. This replaces the rebuttal's "32 configurations, ρ ≥ 0.95", which was computed with the buggy v1 scorer.
 
 ## E05. Agreement with standard 3D shape metrics
 Script: `v2/experiments/e05_convergent_validity.py` → `results/e05_convergent_validity.md`, `.csv`
@@ -144,15 +147,15 @@ Script: `v2/experiments/e05_convergent_validity.py` → `results/e05_convergent_
 
 Metrics compared: 96³ voxel IoU, Chamfer distance divided by the reference diagonal, F-score at 2% of the diagonal (the self-comparison noise floor makes 1% unreliable), and orientation error over matched parts.
 
-- **Case level** (Spearman, n = 897): Geometry vs IoU 0.812, vs F@2% 0.821, vs Chamfer 0.755. Semantic vs IoU 0.810. Coverage vs IoU only 0.470.
-- **Model level** (ρ against Global_v2): IoU 0.945, F@2% 0.978, Chamfer 0.923, orientation error 0.687.
+- **Case level** (Spearman, n = 897): Geometry vs IoU 0.807, vs F@2% 0.816, vs Chamfer 0.753. Semantic vs IoU 0.823. Coverage vs IoU only 0.484.
+- **Model level** (ρ against Global_v2): IoU 0.896, F@2% 0.951, Chamfer 0.918, orientation error 0.736.
 - **Where they disagree, and why component-level scoring matters:**
   - 31.0% of outputs have F@2% ≥ 0.9 but are not exact: a stated constraint is violated or the part count differs.
   - 6.0% have IoU ≥ 0.8 with Sem < 60. Example: the *released record* for kimi-k2.5 on clock L1 contains only 2 of 12 parts (back plate and shaft), yet scores IoU 0.92 and F@2% 1.00, because the plate dominates the volume. Whether the raw response had more parts is unknown (see the caveat above).
   - 2.3% have IoU < 0.3 with Geom ≥ 80. Example: ball-bearing L2, where the released records of five models contain all 12 balls, exactly placed, but neither race (2 parts, about 90% of the volume): IoU 0.09, Geom 85.7.
 
 ### E04 addendum: how constraints are grouped into Sem
-The semantic score averages over clauses, so the grouping acts as a hidden weight. Three alternatives were tested: the mean over individual constraints, over constraint kinds, and over prompt sentences (using the traceability map below). Each keeps the default top-3 set, with Spearman ρ of 0.989, 0.995 and 1.000 respectively. See `results/e04_metric_sensitivity.md`.
+The semantic score averages over clauses, so the grouping acts as a hidden weight. Three alternatives were tested: the mean over constraints, over kinds, and over prompt sentences. All three keep the default top-3 set; they are included among the 20 variants in E04.
 
 ## Traceability: prompt sentences and constraints
 Module: `v2/c2cad/constraints/trace.py`
@@ -216,6 +219,36 @@ Modules: `v2/c2cad/dsl.py` (language reference and interpreter), `v2/c2cad/cml_p
 
 - **Summary of the table.** 9 families need only prompt numbers, 6 also need counts or simple fractions, and 1 (Clock) needs one domain convention (11 o'clock → 120°). The remaining 9 families are not yet written.
 - **Why this matters for the paper.** Generic CAD vocabulary covers regular engineering assemblies with prompt numbers alone; growth laws are where it stops helping. Comparing the `mates` arm with the `tool` arm will show whether computing coordinates is the bottleneck (mates ≈ tool > json) or whether a relational interface helps beyond arithmetic (mates > tool).
+
+## E07. Cross-check against an independently written matcher
+Script: `v2/experiments/e07_cross_implementation.py` → `results/e07_cross_implementation.md`
+
+The June 2026 `runners/matching.py` in the author's `C2CAD` working copy is an independent optimal-assignment scorer. v2 was not derived from it, and it passes its own 22 tests. Both scored the 897 comparable released outputs.
+
+- **Like-for-like** (v2 in its additive / v1-coverage configuration):
+  - the model geometry ranking is identical (Spearman 1.000, Kendall 1.000);
+  - Coverage agrees in 100% of cases;
+  - case-level Geometry Spearman is 0.988, with a mean absolute difference of 0.87 and 89.9% of cases within 2 points;
+  - the remaining gaps (at most 14.6) are Flanged outputs that give orientation as Euler angles, which the June code does not read.
+- **The cross-check found two gaps in v2's normalizer**, now fixed and tested:
+  1. Beams with no width or height were dropped as degenerate. deepseek's Fractal outputs, with correct centerlines, scored Geom 0. Such beams are now kept, and their section is scored as wrong.
+  2. Euler angles given under the name `orientation`, e.g. `[0, 90, 0]`, were ignored, so X-axis pipes were read as Z-axis. Now a unit vector is read as a direction and anything else as Euler degrees.
+
+  E02–E05 were re-run after these fixes, and the numbers above are the updated ones.
+- **v2 default vs June** (pose-gated vs additive): the model ranking agrees at ρ = 0.918. The largest differences are intended. Example: deepseek-chat's Voxel L1 output puts cube *centers* on the lattice corners. The structure is right but everything is shifted by half a cube, so v2 gives Geom 0 and Sem 80 (every gap, alignment and size constraint passes, only the anchor fails), while the additive June score gives 60.
+
+## The author's `C2CAD` working copy (last modified 2026-06-13)
+- **No CadQuery, OpenSCAD, IoU or Chamfer code is present**, here or anywhere under `~/Documents`. The rebuttal's format study must be rebuilt. CadQuery 2.8.0 is installed in the git-ignored `v2/.venv-cad`, a Python 3.12 environment made with uv.
+- **Useful contents:**
+  - the independent matcher (used in E07);
+  - `manual_eval.py`;
+  - four new families not in the release: `phase5_kinematics/generate_fourbar.py` and `generate_fourbar_synth.py` (four-bar linkage analysis and synthesis), and `phase6_engineering/generate_stackup.py` and `generate_swept.py`, with tests;
+  - `C2CAD_paper_v3.pdf`, a June draft;
+  - `results/LANGUAGE_AGNOSTIC_METHODOLOGY.md`.
+- **Unsupported claim** in that methodology note: "switching to Hungarian matching changes fewer than 0.3% of shape pairings". It has no supporting script; do not reuse it.
+
+## Run settings decided
+- **Temperature:** one explicit temperature, 1.0, for every model and arm (user decision, 2026-09-28). It is recorded in every run manifest.
 
 ## Hardening for live runs (done before any API spend)
 - **Output budget.** Output tokens are sized per case: about 90 tokens × parts × 1.6 + 2K for coordinate arms, and 12K for program arms, plus optional reasoning headroom, capped by the model's documented output limit.

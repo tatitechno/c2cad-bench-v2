@@ -36,10 +36,10 @@ Five strands:
 ## 4. Measurement and its validity
 - **Scorer:** Coverage, Geometry (optimal assignment with a pose gate) and Semantic (24,579 clause-traced constraints). ✅
 - **Validity evidence:**
-  - references score 100 against themselves, under permutation and under renumbering (378+ tests) ✅;
+  - references score 100 against themselves, under permutation and under renumbering (842 tests) ✅;
   - responses to controlled corruptions (E02) ✅;
-  - sensitivity across 20 variants of the scorer: the top 3 never changes and ρ ≥ 0.90 (E04) ✅;
-  - convergent validity against IoU, Chamfer and F-score, where model-level ρ is 0.92–0.98 (E05) ✅;
+  - sensitivity across 20 variants of the scorer: the top 3 never changes and ρ ≥ 0.94 (E04) ✅;
+  - convergent validity against IoU, Chamfer and F-score, where model-level ρ is 0.90–0.95 (E05); an independently written matcher reproduces the model ranking exactly (E07) ✅;
   - cases where volume metrics fail: 31% of outputs look near-perfect by F-score but are not exact, and a released record with 10 of 12 parts missing still scores IoU 0.92. Caveat: the released v1 records are post-parsing, so live v2 runs must re-establish these cases ✅/⏳;
   - agreement with human engineers 🧑.
 - **Lesson from v1** (short, appendix): the v1 validators contradicted their own references in 18/25 families (E01), and the v1 released scores are not reproducible. ✅
