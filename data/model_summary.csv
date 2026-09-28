@@ -1,0 +1,14 @@
+model_id,num_cases,mean_global,std_global
+gemini-2.5-pro,75,80.9467,26.2749
+deepseek-reasoner,75,60.4533,34.3241
+claude-sonnet-4-6,75,69.7867,32.0072
+gemini-2.5-flash,75,72.3733,28.9002
+claude-opus-4-6,75,74.1733,29.5871
+gemini-3.1-pro-preview,75,83.48,23.6335
+gpt-4.1,75,72.5333,30.5135
+gpt-5.4-mini,75,70.2933,29.2113
+gemini-3.1-flash-lite-preview,75,61.2133,34.8185
+deepseek-chat,75,66.2133,30.1734
+gemini-3-flash-preview,75,67.52,36.7454
+kimi-k2.5,75,62.8933,33.584
+gpt-5.4,75,82.4667,23.7421

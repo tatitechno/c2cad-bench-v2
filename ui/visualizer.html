@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C2CAD-Bench 3D Evaluator</title>
+    <!-- Phase DBs loaded synchronously with cache-busting so refreshes always get latest results -->
+    <script>
+        (function() {
+            var ts = Date.now();
+            ['p1','p2','p3','p4'].forEach(function(p) {
+                document.write('<scr'+'ipt src="../results/showcase_db_'+p+'.js?v='+ts+'"><\/scr'+'ipt>');
+            });
+        })();
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #0b1121; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #f8fafc; overflow-x: hidden; }
+
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none; }
+
+        /* Header */
+        #ui-header {
+            position: sticky; top: 0; z-index: 100;
+            padding: 14px 32px;
+            background: rgba(11,17,33,0.92); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+        }
+        h1 { margin: 0; font-size: 18px; font-weight: 700;
+             background: linear-gradient(135deg,#60a5fa,#c084fc); background-clip: text;
+             -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap; }
+        .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        select {
+            background: #1e293b; color: #f8fafc; border: 1px solid rgba(255,255,255,0.15);
+            padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+            cursor: pointer; outline: none; min-width: 160px;
+        }
+        select:hover { border-color: #60a5fa; }
+
+        .hbtn {
+            background: linear-gradient(135deg,#3b82f6,#8b5cf6); color: #fff;
+            padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+            text-decoration: none; border: none; cursor: pointer;
+            box-shadow: 0 3px 10px rgba(59,130,246,.35); transition: opacity .15s;
+        }
+        .hbtn:hover { opacity: .85; }
+
+        .overall-badge {
+            padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;
+            border: 1px solid rgba(16,185,129,.3); background: rgba(16,185,129,.12); color: #10b981;
+            white-space: nowrap; display: none;
+        }
+
+        /* Phase tab bar */
+        #phase-bar {
+            position: sticky; top: 57px; z-index: 90;
+            background: rgba(11,17,33,0.96); backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex; padding: 0 32px;
+        }
+        .phase-tab {
+            padding: 11px 22px; font-size: 13px; font-weight: 600; cursor: pointer;
+            background: none; border: none; color: #64748b; border-bottom: 2px solid transparent;
+            transition: color .2s, border-color .2s; white-space: nowrap;
+        }
+        .phase-tab:hover { color: #94a3b8; }
+        .phase-tab.active { color: #60a5fa; border-bottom-color: #60a5fa; }
+        .phase-tab .badge {
+            display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 10px;
+            font-size: 10px; font-weight: 700; background: rgba(255,255,255,0.08); color: #94a3b8;
+        }
+        .phase-tab.active .badge { background: rgba(96,165,250,0.2); color: #60a5fa; }
+
+        /* Content */
+        #content { position: relative; z-index: 5; padding: 28px 32px; display: flex; flex-direction: column; gap: 32px; }
+
+        /* Family block */
+        .family-block { display: flex; flex-direction: column; }
+        .family-header {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 0; margin-bottom: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .family-name { font-size: 17px; font-weight: 700; color: #e2e8f0; }
+        .fam-phase-pill {
+            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+            padding: 2px 8px; border-radius: 6px;
+            background: rgba(96,165,250,0.12); color: #60a5fa;
+        }
+
+        /* Level switcher */
+        .level-switcher { display: flex; gap: 6px; margin-left: auto; }
+        .lvl-btn {
+            padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04);
+            color: #64748b; cursor: pointer; transition: all .15s;
+        }
+        .lvl-btn:hover { border-color: #60a5fa; color: #60a5fa; }
+        .lvl-btn.active { background: rgba(96,165,250,0.18); border-color: #60a5fa; color: #60a5fa; }
+
+        /* Viewport row */
+        .vp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        .viewport-card {
+            background: rgba(30,41,59,0.5); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; overflow: visible; display: flex; flex-direction: column;
+        }
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px 12px 0 0; flex-wrap: wrap; gap: 6px;
+        }
+        .card-title { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13px; font-weight: 600; }
+        .golden-title { color: #10b981; }
+        .llm-title { color: #f8fafc; }
+
+        .score-badge {
+            padding: 2px 7px; border-radius: 5px; font-size: 11px; font-weight: 700;
+            background: rgba(0,0,0,0.4);
+        }
+        .global-badge {
+            padding: 3px 9px; border-radius: 6px; font-size: 12px; font-weight: 800;
+            border: 1px solid; margin-left: 2px;
+        }
+
+        /* Viewport */
+        .viewport { height: 400px; width: 100%; position: relative; cursor: grab; }
+        .viewport:active { cursor: grabbing; }
+
+        /* Toolbar */
+        .vp-toolbar {
+            display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+            background: rgba(0,0,0,0.4); border-bottom: 1px solid rgba(255,255,255,0.04); flex-wrap: wrap;
+        }
+        .vp-btn {
+            padding: 2px 9px; border-radius: 5px; font-size: 10px; font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05);
+            color: #94a3b8; cursor: pointer; transition: all .15s;
+        }
+        .vp-btn:hover { background: rgba(255,255,255,0.12); color: #f1f5f9; }
+        .vp-btn.active { background: rgba(99,102,241,0.25); border-color: #6366f1; color: #a5b4fc; }
+        .zoom-row { display: flex; align-items:center; gap:5px; margin-left:auto; }
+        .zoom-row label { font-size:10px; color:#64748b; font-weight:600; }
+        input[type=range] {
+            -webkit-appearance:none; height:3px; background:rgba(255,255,255,0.12);
+            border-radius:2px; outline:none; width:70px; cursor:pointer;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance:none; width:11px; height:11px; border-radius:50%;
+            background:linear-gradient(135deg,#6366f1,#a78bfa); cursor:pointer;
+        }
+        .zoom-val { font-size:10px; color:#64748b; min-width:26px; }
+
+        /* Provider dots */
+        .model-dot { display:inline-block; width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+        .dot-gemini   { background:#4285f4; }
+        .dot-kimi     { background:#8b5cf6; }
+        .dot-claude   { background:#d97706; }
+        .dot-deepseek { background:#06b6d4; }
+        .dot-openai   { background:#10b981; }
+        .dot-custom   { background:#8b5cf6; }
+
+        /* Prompt */
+        .prompt-container { border-top: 1px solid rgba(255,255,255,0.05); }
+        .prompt-toggle {
+            width:100%; text-align:center; padding:8px; font-size:11px; font-weight:600; color:#94a3b8;
+            background:rgba(0,0,0,0.3); cursor:pointer; border:none; text-transform:uppercase; letter-spacing:0.5px;
+        }
+        .prompt-toggle:hover { color:#f8fafc; background:rgba(0,0,0,0.5); }
+        .prompt-content {
+            display:none; padding:16px; font-family:monospace; font-size:12px; color:#cbd5e1;
+            background:#0f172a; white-space:pre-wrap; word-break:break-word; max-height:220px; overflow-y:auto;
+        }
+
+        /* Tip tooltip */
+        .tip {
+            position:relative; display:inline-flex; align-items:center; justify-content:center;
+            width:13px; height:13px; border-radius:50%;
+            background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+            font-size:8px; font-weight:600; color:#475569; cursor:help;
+            margin-left:3px; vertical-align:middle; flex-shrink:0;
+            font-style:italic; font-family:serif;
+        }
+        .tip::after {
+            content:attr(data-tip); position:fixed;
+            background:#1e293b; color:#e2e8f0; font-size:11px; font-weight:400;
+            white-space:normal; width:230px; padding:7px 11px; border-radius:7px;
+            border:1px solid rgba(255,255,255,0.12); box-shadow:0 8px 24px rgba(0,0,0,0.6);
+            pointer-events:none; opacity:0; transition:opacity .18s; z-index:99999;
+            margin-top:-60px; margin-left:8px;
+        }
+        .tip:hover::after { opacity:1; }
+        .tip:hover { background:rgba(255,255,255,0.12); color:#94a3b8; }
+
+        #empty-state { text-align:center; margin-top:100px; color:#64748b; font-size:16px; }
+        .loading-ph   { text-align:center; padding:60px; color:#475569; font-size:14px; }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="ui-header">
+        <h1>C2CAD-Bench 3D Evaluator</h1>
+        <div class="header-right">
+            <select id="modelSelector"></select>
+            <button onclick="location.reload(true)" class="hbtn">⟳ Reload</button>
+            <a href="results.html" class="hbtn">Scoreboard</a>
+            <div id="overallScore" class="overall-badge"></div>
+        </div>
+    </div>
+
+    <div id="phase-bar">
+        <button class="phase-tab active" data-phase="1">Phase 1 · Geometric Forms <span class="badge">18</span></button>
+        <button class="phase-tab"        data-phase="2">Phase 2 · Complex Structures <span class="badge">18</span></button>
+        <button class="phase-tab"        data-phase="3">Phase 3 · Engineering <span class="badge">18</span></button>
+        <button class="phase-tab"        data-phase="4">Phase 4 · Bio-Inspired <span class="badge">21</span></button>
+    </div>
+
+    <div id="content">
+        <div id="empty-state">Loading…</div>
+    </div>
+
+    <!-- Three.js r160 ES modules — same as the working reference build -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
+
+        const canvas   = document.getElementById('bg-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, logarithmicDepthBuffer: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+        renderer.toneMapping       = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
+        renderer.outputColorSpace  = THREE.SRGBColorSpace;
+        renderer.localClippingEnabled = true;
+
+        let scenesArray = [];
+
+        // ── Palette ─────────────────────────────────────────────────────────
+        const PALETTE = {
+            box:     { color:0x3b82f6, emissive:0x1d4ed8, metalness:0.15, roughness:0.25 },
+            cylinder:{ color:0x10b981, emissive:0x064e3b, metalness:0.2,  roughness:0.2  },
+            sphere:  { color:0xf43f5e, emissive:0x9f1239, metalness:0.1,  roughness:0.35 },
+            pipe:    { color:0xf59e0b, emissive:0x78350f, metalness:0.35, roughness:0.15 },
+            beam:    { color:0xa78bfa, emissive:0x4c1d95, metalness:0.1,  roughness:0.3  },
+            cone:    { color:0xec4899, emissive:0x831843, metalness:0.2,  roughness:0.2  },
+            torus:   { color:0x06b6d4, emissive:0x164e63, metalness:0.3,  roughness:0.15 },
+            default: { color:0xd1d5db, emissive:0x374151, metalness:0.05, roughness:0.4  }
+        };
+        function makeMat(type, opacity=1.0) {
+            const p = PALETTE[type] || PALETTE.default;
+            return new THREE.MeshStandardMaterial({ color:p.color, emissive:p.emissive, emissiveIntensity:0.05,
+                metalness:p.metalness, roughness:p.roughness, transparent:opacity<1, opacity, side:THREE.DoubleSide });
+        }
+        function makeWireMat(type) {
+            const p = PALETTE[type] || PALETTE.default;
+            return new THREE.MeshBasicMaterial({ color:p.color, wireframe:true, transparent:true, opacity:0.75 });
+        }
+
+        // ── Axis parser (handles string "X", vector [1,0,0], or missing) ───
+        const _AXIS_MAP = {x:[1,0,0],'+x':[1,0,0],'-x':[-1,0,0],y:[0,1,0],'+y':[0,1,0],'-y':[0,-1,0],z:[0,0,1],'+z':[0,0,1],'-z':[0,0,-1]};
+        function parseAxis(a) {
+            if (!a) return [0,0,1];
+            if (typeof a === 'string') return _AXIS_MAP[a.toLowerCase().trim()] || [0,0,1];
+            if (Array.isArray(a) && a.length >= 3) return a.map(Number);
+            return [0,0,1];
+        }
+        // ── Center parser (handles dict {x,y,z} or array [x,y,z]) ──────
+        function parseCenter(c) {
+            if (!c) return [0,0,0];
+            if (Array.isArray(c)) return c.map(Number);
+            if (typeof c === 'object' && 'x' in c) return [Number(c.x)||0, Number(c.y)||0, Number(c.z)||0];
+            return [0,0,0];
+        }
+
+        // ── Mesh builder ────────────────────────────────────────────────────
+        function buildMesh(shape, mat) {
+            const c = parseCenter(shape.center);
+            const t = (shape.type||'').toLowerCase();
+
+            if (t === 'box') {
+                let sz = shape.size || shape.dimensions || shape.dim || [10,10,10];
+                if (typeof sz === 'object' && !Array.isArray(sz)) sz = [Number(sz.x||sz.width||10), Number(sz.y||sz.depth||10), Number(sz.z||sz.height||10)];
+                const m = new THREE.Mesh(new THREE.BoxGeometry(...sz.map(Number)), mat);
+                m.position.set(...c); m.castShadow=true; m.receiveShadow=true; return m;
+
+            } else if (t === 'sphere') {
+                const m = new THREE.Mesh(new THREE.SphereGeometry(shape.radius||1,48,48), mat);
+                m.position.set(...c); m.castShadow=true; return m;
+
+            } else if (t === 'cylinder') {
+                const r=Number(shape.radius)||1, h=Number(shape.height||shape.length)||2;
+                const m = new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,64), mat);
+                m.position.set(...c);
+                const axis = new THREE.Vector3(...parseAxis(shape.axis)).normalize();
+                m.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), axis));
+                m.castShadow=true; m.receiveShadow=true; return m;
+
+            } else if (t === 'pipe') {
+                const ri=Number(shape.inner_radius)||2, ro=Number(shape.outer_radius)||4, h=Number(shape.height||shape.length)||8;
+                const grp = new THREE.Group();
+                grp.add(new THREE.Mesh(new THREE.CylinderGeometry(ro,ro,h,64,1,true), mat));
+                grp.add(new THREE.Mesh(new THREE.CylinderGeometry(ri,ri,h,64,1,true), mat));
+                const r1=new THREE.Mesh(new THREE.RingGeometry(ri,ro,64),mat); r1.rotation.x=Math.PI/2;  r1.position.y= h/2; grp.add(r1);
+                const r2=new THREE.Mesh(new THREE.RingGeometry(ri,ro,64),mat); r2.rotation.x=-Math.PI/2; r2.position.y=-h/2; grp.add(r2);
+                const axis = new THREE.Vector3(...parseAxis(shape.axis)).normalize();
+                grp.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), axis));
+                grp.position.set(...c); return grp;
+
+            } else if (t === 'cone') {
+                const rb=Number(shape.base_radius||shape.radius||shape.start_radius)||2;
+                const rt=Number(shape.top_radius||shape.end_radius)||0;
+                const h=Number(shape.height||shape.length)||4;
+                const m = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,48), mat);
+                m.position.set(...c);
+                const axis = new THREE.Vector3(...parseAxis(shape.axis)).normalize();
+                m.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), axis));
+                m.castShadow=true; m.receiveShadow=true; return m;
+
+            } else if (t === 'torus') {
+                const R=Number(shape.ring_radius||shape.major_radius)||5;
+                const r=Number(shape.tube_radius||shape.minor_radius)||1;
+                const m = new THREE.Mesh(new THREE.TorusGeometry(R,r,32,64), mat);
+                m.position.set(...c);
+                // Torus default lies in XY plane — rotate to match axis if given
+                const axis = new THREE.Vector3(...parseAxis(shape.axis)).normalize();
+                m.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,0,1), axis));
+                m.castShadow=true; m.receiveShadow=true; return m;
+
+            } else if (t === 'beam') {
+                const v1=new THREE.Vector3(...(shape.start||[0,0,0])), v2=new THREE.Vector3(...(shape.end||[10,0,0]));
+                const len=Math.max(v1.distanceTo(v2),0.1);
+                const m=new THREE.Mesh(new THREE.BoxGeometry(shape.width||2,shape.height||2,len), mat);
+                m.position.copy(new THREE.Vector3().addVectors(v1,v2).multiplyScalar(0.5));
+                m.lookAt(v2); return m;
+
+            } else {
+                // Unknown type (cable, line, etc.) — thin cylinder between points
+                const start = shape.start||shape.points?.[0]||c;
+                const end   = shape.end||shape.points?.[shape.points?.length-1]||[c[0]+5,c[1],c[2]];
+                const v1=new THREE.Vector3(...start), v2=new THREE.Vector3(...end);
+                const len=Math.max(v1.distanceTo(v2),0.1);
+                const m=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,len,8), mat);
+                m.position.copy(new THREE.Vector3().addVectors(v1,v2).multiplyScalar(0.5));
+                const axis=new THREE.Vector3().subVectors(v2,v1).normalize();
+                m.setRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),axis));
+                return m;
+            }
+        }
+
+        // ── Lighting ────────────────────────────────────────────────────────
+        function addProLighting(scene) {
+            scene.add(new THREE.HemisphereLight(0xddeeff,0x0a0a14,0.5));
+            const key=new THREE.DirectionalLight(0xffffff,2.0);
+            key.position.set(120,80,200); key.castShadow=true;
+            key.shadow.mapSize.set(2048,2048);
+            key.shadow.camera.near=1; key.shadow.camera.far=2000;
+            key.shadow.camera.left=key.shadow.camera.bottom=-400;
+            key.shadow.camera.right=key.shadow.camera.top=400;
+            key.shadow.bias=-0.001; scene.add(key);
+            const fill=new THREE.DirectionalLight(0x88aaff,0.6); fill.position.set(-150,-60,-100); scene.add(fill);
+            const rim=new THREE.DirectionalLight(0xffaa44,0.35); rim.position.set(0,-200,50); scene.add(rim);
+            scene.add(new THREE.AmbientLight(0xffffff,0.18));
+        }
+
+        // ── Create viewport ──────────────────────────────────────────────────
+        function createViewport(containerDiv, shapes, isAI, vpId) {
+            const scene=new THREE.Scene();
+            scene.background=new THREE.Color(isAI ? 0x11080d : 0x08110b);
+            scene.fog=new THREE.FogExp2(scene.background.getHex(),0.0007);
+            addProLighting(scene);
+
+            const grid=new THREE.GridHelper(1000,20,0x334155,0x1e293b);
+            grid.rotation.x=Math.PI/2; scene.add(grid);
+
+            const camera=new THREE.PerspectiveCamera(50, containerDiv.clientWidth/Math.max(1,containerDiv.clientHeight), 0.1, 10000);
+            const controls=new OrbitControls(camera, containerDiv);
+            controls.enableDamping=true; controls.dampingFactor=0.06;
+            controls.zoomSpeed=2.0; controls.panSpeed=0.8;
+            controls.minDistance=0.5; controls.maxDistance=5000;
+            controls.screenSpacePanning=true;
+
+            const meshObjects=[]; const com=new THREE.Vector3(); let count=0;
+
+            (shapes||[]).forEach(shape => {
+                if (!shape||!shape.type) return;
+                try {
+                    const mat=makeMat(shape.type);
+                    const obj=buildMesh(shape,mat);
+                    if (!obj) return;
+                    obj.userData.shapeType=shape.type;
+                    scene.add(obj); meshObjects.push(obj);
+                    const c=shape.center||(shape.start?shape.start:[0,0,0]);
+                    com.x+=c[0]; com.y+=c[1]; com.z+=c[2]; count++;
+                } catch(e) { console.warn('buildMesh error', shape.type, e); }
+            });
+
+            if (count>0) {
+                com.divideScalar(count); controls.target.copy(com);
+                const dist=Math.max(100,Math.pow(count,0.42)*55);
+                const rad=isAI ? -Math.PI/5 : Math.PI/4;
+                camera.position.set(com.x+Math.cos(rad)*dist, com.y+Math.sin(rad)*dist, com.z+dist*0.65);
+            } else { camera.position.set(200,200,200); }
+            controls.update();
+
+            let xray=false, wire=false, cutMode=false;
+            // Cross-section clipping plane: clips everything in front of the Y=target plane
+            // so you can see inside pipes and hollow objects
+            const clipPlane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
+            function applyModes() {
+                meshObjects.forEach(obj => {
+                    const st=obj.userData.shapeType||'default';
+                    obj.traverse(child => {
+                        if (!child.isMesh) return;
+                        child.material = wire ? makeWireMat(st) : makeMat(st, xray?0.22:1.0);
+                        if (cutMode) {
+                            child.material.clippingPlanes = [clipPlane];
+                            child.material.clipShadows = true;
+                            child.material.side = THREE.DoubleSide;
+                        } else {
+                            child.material.clippingPlanes = [];
+                            child.material.clipShadows = false;
+                        }
+                        child.material.needsUpdate = true;
+                    });
+                });
+            }
+            function focusCamera() {
+                controls.target.copy(com);
+                const dist=Math.max(100,Math.pow(count||1,0.42)*55);
+                const rad=isAI ? -Math.PI/5 : Math.PI/4;
+                camera.position.set(com.x+Math.cos(rad)*dist, com.y+Math.sin(rad)*dist, com.z+dist*0.65);
+                controls.update();
+            }
+
+            const xrayBtn    = document.getElementById('xray-'+vpId);
+            const wireBtn    = document.getElementById('wire-'+vpId);
+            const cutBtn     = document.getElementById('cut-'+vpId);
+            const focusBtn   = document.getElementById('focus-'+vpId);
+            const zoomSlider = document.getElementById('zoom-'+vpId);
+            const zoomValEl  = document.getElementById('zval-'+vpId);
+            if (xrayBtn)  xrayBtn.addEventListener('click',  () => { xray=!xray; wire=false; xrayBtn.classList.toggle('active',xray); wireBtn?.classList.remove('active'); applyModes(); });
+            if (wireBtn)  wireBtn.addEventListener('click',  () => { wire=!wire; xray=false; wireBtn.classList.toggle('active',wire); xrayBtn?.classList.remove('active'); applyModes(); });
+            if (cutBtn)   cutBtn.addEventListener('click',   () => {
+                cutMode=!cutMode;
+                cutBtn.classList.toggle('active',cutMode);
+                // Set clip plane at the centre of mass (Y=com.y)
+                clipPlane.constant = com.y;
+                applyModes();
+            });
+            if (focusBtn) focusBtn.addEventListener('click', () => {
+                cutMode=false; xray=false; wire=false;
+                cutBtn?.classList.remove('active'); xrayBtn?.classList.remove('active'); wireBtn?.classList.remove('active');
+                applyModes(); focusCamera();
+                if (zoomSlider) { zoomSlider.value='1'; camera.fov=50; camera.updateProjectionMatrix(); if(zoomValEl) zoomValEl.textContent='1.0×'; }
+            });
+            if (zoomSlider) zoomSlider.addEventListener('input', () => {
+                const v=parseFloat(zoomSlider.value);
+                if (zoomValEl) zoomValEl.textContent=v.toFixed(1)+'×';
+                camera.fov=50/v; camera.updateProjectionMatrix();
+            });
+
+            scenesArray.push({ scene, camera, controls, element: containerDiv });
+        }
+
+        // ── Helpers ──────────────────────────────────────────────────────────
+        function getProvider(m) {
+            if (m.startsWith('gemini'))   return 'gemini';
+            if (m.startsWith('claude'))   return 'claude';
+            if (m.startsWith('deepseek')) return 'deepseek';
+            if (m.startsWith('gpt')||m.startsWith('o1')||m.startsWith('o3')) return 'openai';
+            if (m.startsWith('kimi')||m.startsWith('moonshot')) return 'kimi';
+            return 'custom';
+        }
+        function prettyModel(m) {
+            return ({
+                // Gemini
+                'gemini-2.5-flash':              'Gemini 2.5 Flash',
+                'gemini-2.5-pro':                'Gemini 2.5 Pro',
+                'gemini-3.1-flash-lite-preview': 'Gemini 3.1 Flash-Lite',
+                'gemini-3-flash-preview':        'Gemini 3 Flash',
+                'gemini-3.1-pro-preview':        'Gemini 3.1 Pro',
+                // Claude
+                'claude-opus-4-6':               'Claude Opus 4.6',
+                'claude-sonnet-4-6':             'Claude Sonnet 4.6',
+                // DeepSeek
+                'deepseek-chat':                 'DeepSeek V3.2',
+                'deepseek-reasoner':             'DeepSeek R1',
+                // OpenAI
+                'gpt-4.1':                       'GPT-4.1',
+                'gpt-5.4':                       'GPT-5.4',
+                'gpt-5.4-mini':                  'GPT-5.4 Mini',
+                // Kimi (Moonshot AI)
+                'kimi-k2.5':                     'Kimi K2.5',
+            })[m] || m;
+        }
+        function scoreColor(v) { return v>80?'#10b981':v>40?'#f59e0b':'#f43f5e'; }
+
+        function toolbar(id) {
+            return `<div class="vp-toolbar">
+                <button class="vp-btn" id="xray-${id}">🔍 X-Ray</button>
+                <button class="vp-btn" id="wire-${id}">📐 Wire</button>
+                <button class="vp-btn" id="cut-${id}">✂ Cut</button>
+                <button class="vp-btn" id="focus-${id}">🎯 Reset</button>
+                <div class="zoom-row">
+                    <label>ZOOM</label>
+                    <input type="range" id="zoom-${id}" min="0.2" max="20" step="0.1" value="1">
+                    <span class="zoom-val" id="zval-${id}">1.0×</span>
+                </div>
+            </div>`;
+        }
+
+        // ── Populate model selector ──────────────────────────────────────────
+        let selectorBuilt = false;
+        function populateModelSelector(models) {
+            if (selectorBuilt || !models) return;
+            selectorBuilt = true;
+            const sel = document.getElementById('modelSelector');
+            const provOrder = ['gemini','claude','deepseek','openai','kimi','custom'];
+            const grouped = {};
+            for (const id of Object.keys(models)) {
+                const p=getProvider(id); (grouped[p]=grouped[p]||[]).push(id);
+            }
+            for (const prov of provOrder) {
+                if (!grouped[prov]?.length) continue;
+                const og=document.createElement('optgroup'); og.label=prov.charAt(0).toUpperCase()+prov.slice(1);
+                for (const id of grouped[prov]) {
+                    const opt=document.createElement('option'); opt.value=id; opt.textContent=prettyModel(id); og.appendChild(opt);
+                }
+                sel.appendChild(og);
+            }
+        }
+
+        // ── Render one phase ─────────────────────────────────────────────────
+        function renderPhase(phaseData, modelId) {
+            const content = document.getElementById('content');
+            content.innerHTML = '';
+            scenesArray.forEach(vp => vp.scene.traverse(o => { if(o.isMesh){o.geometry.dispose();o.material.dispose();} }));
+            scenesArray = [];
+
+            if (!phaseData) {
+                content.innerHTML = '<div class="loading-ph">⚠ Phase data not found — run the benchmark first.</div>';
+                return;
+            }
+
+            const { golden, models } = phaseData;
+            const aiData = models[modelId] || [];
+            const prov   = getProvider(modelId);
+
+            // Group by family, preserve insertion order
+            const familyMap = new Map();
+            golden.forEach((g, idx) => {
+                if (!familyMap.has(g.family)) familyMap.set(g.family, []);
+                familyMap.get(g.family).push({ g, ai: aiData[idx]||null, idx });
+            });
+
+            let totalCov=0,totalGeom=0,totalSem=0,totalGlob=0,scoreCount=0;
+
+            familyMap.forEach((entries, familyName) => {
+                entries.sort((a,b)=>(a.g.difficultyID||0)-(b.g.difficultyID||0));
+
+                // Stable block ID (no spaces)
+                const blockId = 'fb-'+familyName.replace(/[^a-z0-9]/gi,'_');
+                const block = document.createElement('div');
+                block.className = 'family-block';
+
+                const lvlBtns = entries.map((e,li) =>
+                    `<button class="lvl-btn${li===0?' active':''}" data-li="${li}"
+                             onclick="window._switchLvl('${blockId}',${li},${entries.length})">L${e.g.difficultyID||li+1}</button>`
+                ).join('');
+
+                block.innerHTML = `<div class="family-header">
+                    <span class="family-name">${familyName}</span>
+                    <span class="fam-phase-pill">Phase ${entries[0].g.phase}</span>
+                    <div class="level-switcher">${lvlBtns}</div>
+                </div>`;
+
+                entries.forEach(({ g, ai, idx }, li) => {
+                    const vpGId=`vp-g-${idx}`, vpAId=`vp-a-${idx}`;
+                    const show = li===0;
+
+                    // Score badges
+                    let scoreTags='';
+                    if (ai) {
+                        const cv=ai.score_cov||0, gm=ai.score_geom||0, sm=ai.score_sem||ai.score_phys||0, gl=ai.score_global||0;
+                        totalCov+=cv; totalGeom+=gm; totalSem+=sm; totalGlob+=gl; scoreCount++;
+                        scoreTags=`
+                            <span class="score-badge" style="color:${scoreColor(cv)}">Cov ${cv}%<span class="tip" data-tip="Coverage — correct number of parts vs golden.">i</span></span>
+                            <span class="score-badge" style="color:${scoreColor(gm)}">Geom ${gm}%<span class="tip" data-tip="Geometry — positional + dimensional accuracy vs golden.">i</span></span>
+                            <span class="score-badge" style="color:${scoreColor(sm)}">Sem ${sm}%<span class="tip" data-tip="Semantic — physics (gravity, connectivity, interference) + family-specific structural rules.">i</span></span>
+                            <span class="global-badge" style="color:${scoreColor(gl)};border-color:${scoreColor(gl)}60">⊕ ${gl}%<span class="tip" data-tip="Global = Cov×20% + Geom×30% + Sem×50%.">i</span></span>`;
+                    }
+
+                    const rawPrompt = g.prompt ? g.prompt.replace(/</g,'&lt;').replace(/>/g,'&gt;') : 'No prompt embedded.';
+
+                    const row = document.createElement('div');
+                    row.className='vp-row'; row.id=`${blockId}-row-${li}`;
+                    row.style.display = show?'grid':'none';
+                    row.innerHTML=`
+                        <div class="viewport-card">
+                            <div class="card-header">
+                                <span class="card-title golden-title">🏆 Ground Truth Reference</span>
+                                <span style="font-size:11px;color:#64748b">${g.difficultyLabel} · ${(g.shapes||[]).length} parts</span>
+                            </div>
+                            ${toolbar(vpGId)}
+                            <div class="viewport" id="${vpGId}"></div>
+                            <div class="prompt-container">
+                                <button class="prompt-toggle" onclick="window._togglePrompt('prompt-${idx}')">[+] View Prompt</button>
+                                <div class="prompt-content" id="prompt-${idx}">${rawPrompt}</div>
+                            </div>
+                        </div>
+                        <div class="viewport-card">
+                            <div class="card-header">
+                                <span class="card-title llm-title">
+                                    <span class="model-dot dot-${prov}"></span>
+                                    ${prettyModel(modelId)} ${scoreTags}
+                                </span>
+                                <span style="font-size:11px;color:#64748b">${(ai?.shapes||[]).length} parts</span>
+                            </div>
+                            ${toolbar(vpAId)}
+                            <div class="viewport" id="${vpAId}"></div>
+                        </div>`;
+
+                    block.appendChild(row);
+                });
+
+                content.appendChild(block);
+
+                // Create viewports for first level now; others lazily
+                block._entries = entries;
+                block._loaded  = new Set([0]);
+                const {g:g0, ai:ai0} = entries[0];
+                createViewport(document.getElementById(`vp-g-${entries[0].idx}`), g0.shapes||[], false, `vp-g-${entries[0].idx}`);
+                createViewport(document.getElementById(`vp-a-${entries[0].idx}`), ai0?.shapes||[], true, `vp-a-${entries[0].idx}`);
+            });
+
+            // Overall badge
+            const el=document.getElementById('overallScore');
+            if (scoreCount>0) {
+                const aGl=Math.round(totalGlob/scoreCount);
+                el.textContent=`Agg — Cov ${Math.round(totalCov/scoreCount)}% · Geom ${Math.round(totalGeom/scoreCount)}% · Sem ${Math.round(totalSem/scoreCount)}% · ⊕${aGl}%`;
+                el.style.display='block';
+                el.style.color=scoreColor(aGl); el.style.borderColor=scoreColor(aGl)+'50'; el.style.background=scoreColor(aGl)+'18';
+            } else { el.style.display='none'; }
+        }
+
+        // ── Level switch (global) ────────────────────────────────────────────
+        window._switchLvl = function(blockId, li, total) {
+            const block = document.querySelector(`#${blockId}-row-0`)?.closest('.family-block');
+            if (!block) return;
+            block.querySelectorAll('.lvl-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.li)===li));
+            for (let i=0;i<total;i++) {
+                const row=document.getElementById(`${blockId}-row-${i}`);
+                if (row) row.style.display=i===li?'grid':'none';
+            }
+            if (block._loaded.has(li)) return;
+            block._loaded.add(li);
+            const {g, ai, idx}=block._entries[li];
+            createViewport(document.getElementById(`vp-g-${idx}`), g.shapes||[], false, `vp-g-${idx}`);
+            createViewport(document.getElementById(`vp-a-${idx}`), ai?.shapes||[], true,  `vp-a-${idx}`);
+        };
+
+        // ── Prompt toggle ────────────────────────────────────────────────────
+        window._togglePrompt = function(id) {
+            const el=document.getElementById(id);
+            if (el) el.style.display=el.style.display==='block'?'none':'block';
+        };
+
+        // ── Phase switching ──────────────────────────────────────────────────
+        let currentPhase = 1, currentModelId = null;
+
+        function switchPhase(phase) {
+            currentPhase = phase;
+            document.querySelectorAll('.phase-tab').forEach(t => t.classList.toggle('active', parseInt(t.dataset.phase)===phase));
+            const phaseData = window['CG3D_P'+phase] || null;
+            if (phaseData) populateModelSelector(phaseData.models);
+            const sel = document.getElementById('modelSelector');
+            currentModelId = currentModelId || sel.value;
+            sel.value = currentModelId;
+            renderPhase(phaseData, currentModelId);
+        }
+
+        document.querySelectorAll('.phase-tab').forEach(tab =>
+            tab.addEventListener('click', () => switchPhase(parseInt(tab.dataset.phase))));
+
+        document.getElementById('modelSelector').addEventListener('change', e => {
+            currentModelId = e.target.value;
+            renderPhase(window['CG3D_P'+currentPhase]||null, currentModelId);
+        });
+
+        switchPhase(1);
+
+        // ── Render loop ──────────────────────────────────────────────────────
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.setScissorTest(false);
+            renderer.clear();
+            renderer.setScissorTest(true);
+            scenesArray.forEach(vp => {
+                vp.controls.update();
+                const rect=vp.element.getBoundingClientRect();
+                if (rect.bottom<0||rect.top>window.innerHeight||rect.right<0||rect.left>window.innerWidth) return;
+                const W=rect.right-rect.left, H=rect.bottom-rect.top;
+                if (W<1||H<1) return;
+                renderer.setViewport(rect.left, window.innerHeight-rect.bottom, W, H);
+                renderer.setScissor(rect.left, window.innerHeight-rect.bottom, W, H);
+                vp.camera.aspect=W/H; vp.camera.updateProjectionMatrix();
+                renderer.render(vp.scene, vp.camera);
+            });
+        }
+        window.addEventListener('resize', () => renderer.setSize(window.innerWidth, window.innerHeight));
+        animate();
+    </script>
+</body>
+</html>

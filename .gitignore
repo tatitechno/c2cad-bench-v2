@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.pytest_cache/
+dist/
+build/
+.eggs/
+
+# Environment and secrets
+.env
+*.key
+*.pem
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.claude/
+
+# Temporary files
+_temp_payload_*.json
+*.tmp
+
+# Large generated showcase files
+showcase_golden.json
+showcase_llm.json
+
+# Throwaway mock/self-test runs (real experiment runs are committed deliberately)
+v2/runs/selftest*/

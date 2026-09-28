@@ -1,0 +1,39 @@
+{
+  "benchmark": "C2CAD-Bench",
+  "version": "1.0.0",
+  "repository": "https://github.com/c2cad-bench/c2cad-bench",
+  "artifact_files": {
+    "cases": "data/cases.jsonl",
+    "model_outputs": "data/model_outputs.jsonl",
+    "scores": "data/scores.csv",
+    "model_summary": "data/model_summary.csv",
+    "viewer_database": "results/showcase_db.js"
+  },
+  "artifact_counts": {
+    "test_cases": 75,
+    "models": 13,
+    "model_case_results": 975
+  },
+  "live_evaluation_defaults": {
+    "temperature": 0.0,
+    "timeout_seconds": 300,
+    "api_call_retries": 3,
+    "zero_score_retries": 3,
+    "json_extraction": "raw JSON array preferred; parser extracts JSON arrays from model text when needed",
+    "max_output_tokens": "dynamic, based on expected primitive count, capped per provider"
+  },
+  "scoring": {
+    "coverage_weight": 0.2,
+    "geometry_weight": 0.3,
+    "semantic_weight": 0.5,
+    "semantic_gates": [
+      "coverage",
+      "geometry"
+    ],
+    "global_gate": "structural validity gate below 15 geometry"
+  },
+  "notes": [
+    "Commercial API behavior can drift after release. Use the released model outputs for the fixed paper snapshot.",
+    "The prompt audit is included as data/prompt_audit.csv and can be regenerated with scripts/audit_prompts.py."
+  ]
+}

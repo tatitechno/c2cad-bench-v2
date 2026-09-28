@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C2CAD-Bench - Complete Model Scoreboard</title>
+    <!-- Cache-busting so refreshes always get latest results -->
+    <script>document.write('<scr'+'ipt src="../results/showcase_db.js?v='+Date.now()+'"><\/scr'+'ipt>');</script>
+    <style>
+        body { margin: 0; background: #0b1121; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #f8fafc; padding: 40px;}
+
+        .header { margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .header-text {}
+        h1 { margin: 0 0 8px 0; font-size: 28px; font-weight: 600; background: linear-gradient(135deg, #60a5fa, #c084fc); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { margin: 0; font-size: 15px; color: #94a3b8; }
+
+        .visualizer-btn {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 10px 20px; border-radius: 8px;
+            font-size: 13px; font-weight: 600; text-decoration: none; display: inline-block; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+            transition: all 0.2s; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;
+        }
+        .visualizer-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* ── Model toggle bar ── */
+        .model-toggle-bar {
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 20px; padding: 12px 16px; border-radius: 10px;
+            background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08);
+        }
+        .model-toggle-bar .label { font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px; }
+        .model-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+            cursor: pointer; border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.04); color: #94a3b8; transition: all .15s;
+            user-select: none;
+        }
+        .model-chip.active { background: rgba(96,165,250,0.15); border-color: rgba(96,165,250,0.4); color: #e2e8f0; }
+        .model-chip:hover { border-color: rgba(255,255,255,0.25); }
+        .model-chip .chip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .toggle-all-btn {
+            padding: 5px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); color: #94a3b8;
+            margin-left: auto; transition: all .15s;
+        }
+        .toggle-all-btn:hover { border-color: #60a5fa; color: #60a5fa; }
+
+        /* ── Summary cards ── */
+        .summary-section { margin-bottom: 28px; }
+        .summary-toggle {
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+            margin-bottom: 12px; user-select: none;
+        }
+        .summary-toggle .arrow { font-size: 14px; color: #64748b; transition: transform .2s; }
+        .summary-toggle .arrow.open { transform: rotate(90deg); }
+        .summary-toggle .stitle { font-size: 13px; font-weight: 600; color: #94a3b8; }
+        .summary-toggle .scount { font-size: 11px; color: #475569; }
+
+        .summary-row {
+            display: flex; gap: 16px; flex-wrap: wrap;
+            overflow: hidden; transition: max-height .3s ease, opacity .25s;
+        }
+        .summary-row.collapsed { max-height: 0; opacity: 0; margin: 0; }
+        .summary-card {
+            flex: 1; min-width: 200px; max-width: 320px; padding: 16px 20px; border-radius: 12px;
+            background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.08);
+        }
+        .summary-card .model-name {
+            font-size: 13px; font-weight: 700; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .summary-card .agg-scores { display: flex; gap: 12px; flex-wrap: wrap; }
+        .summary-card .agg-pill {
+            font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 6px;
+        }
+
+        /* Provider dots */
+        .provider-dot {
+            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; display: inline-block;
+        }
+        .dot-gemini   { background: #4285f4; }
+        .dot-claude    { background: #d97706; }
+        .dot-deepseek  { background: #06b6d4; }
+        .dot-kimi      { background: #8b5cf6; }
+        .dot-openai    { background: #10b981; }
+        .dot-mistral   { background: #f43f5e; }
+        .dot-groq      { background: #a78bfa; }
+        .dot-custom    { background: #64748b; }
+
+        .scoreboard-card {
+            background: #0f172a;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: rgba(0,0,0,0.4); padding: 16px; font-size: 13px; font-weight: 600; color: #cbd5e1; border-bottom: 2px solid rgba(255,255,255,0.1); white-space: nowrap; }
+        td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        tr:hover { background: rgba(255,255,255,0.02); }
+
+        .th-model { display: flex; align-items: center; gap: 8px; }
+        .th-model-name { font-size: 12px; line-height: 1.3; }
+
+        .family-name { font-weight: 600; color: #e2e8f0; }
+        .diff-label { font-size: 12px; color: #94a3b8; }
+        .phase-tag { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; margin-left: 6px; }
+        .phase-1 { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .phase-2 { background: rgba(168,85,247,0.15); color: #c084fc; }
+        .phase-3 { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+        .score-pill {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            width: 48px; text-align: center;
+        }
+
+        .score-box { display: flex; gap: 8px; align-items: center;}
+        .score-label { font-size: 11px; color: #64748b; width: 30px; text-align: right;}
+
+        /* Family row: clickable, shows averaged global score */
+        .family-row { cursor: pointer; transition: background .15s; }
+        .family-row:hover { background: rgba(255,255,255,0.04) !important; }
+        .family-row .expand-arrow { font-size: 11px; color: #64748b; margin-right: 6px; transition: transform .2s; display: inline-block; }
+        .family-row.expanded .expand-arrow { transform: rotate(90deg); }
+
+        /* Detail rows: hidden by default */
+        .detail-row { display: none; background: rgba(0,0,0,0.15); }
+        .detail-row.visible { display: table-row; }
+        .detail-row td { padding: 8px 16px; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+
+        .good { background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #10b981; }
+        .warn { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); color: #f59e0b; }
+        .bad { background: rgba(244, 63, 94, 0.15); border-color: rgba(244, 63, 94, 0.3); color: #f43f5e; }
+
+        .global-pill {
+            font-size: 13px; font-weight: 800; padding: 4px 12px; border-radius: 8px;
+            border: 2px solid; display: inline-flex; align-items: center; gap: 4px;
+        }
+        .global-good { background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.5); color: #10b981; }
+        .global-warn { background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.5); color: #f59e0b; }
+        .global-bad  { background: rgba(244, 63, 94, 0.2); border-color: rgba(244, 63, 94, 0.5); color: #f43f5e; }
+
+        .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #64748b; }
+
+        /* Phase tabs */
+        .phase-bar { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .phase-tab {
+            padding: 9px 20px; font-size: 13px; font-weight: 600; cursor: pointer;
+            background: none; border: none; color: #64748b; border-bottom: 2px solid transparent;
+            transition: color .18s, border-color .18s; white-space: nowrap;
+        }
+        .phase-tab:hover { color: #94a3b8; }
+        .phase-tab.active { color: #60a5fa; border-bottom-color: #60a5fa; }
+        .phase-tab .badge { display:inline-block; margin-left:5px; padding:1px 6px; border-radius:9px;
+            font-size:10px; font-weight:700; background:rgba(255,255,255,0.07); color:#94a3b8; }
+        .phase-tab.active .badge { background:rgba(96,165,250,0.18); color:#60a5fa; }
+
+        /* Phase group header row */
+        .phase-group-hdr td { padding: 10px 16px 6px 16px; font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .8px; color: #475569;
+            background: rgba(0,0,0,0.25); border-top: 2px solid rgba(255,255,255,0.06); }
+
+        /* Hide table columns for toggled-off models */
+        .col-hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-text">
+            <h1>Model Evaluation Scoreboard</h1>
+            <p>Comprehensive layout of reasoning detachment across all evaluated models during the C2CAD-Bench structural benchmarks.</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <button onclick="location.reload(true)" class="visualizer-btn" style="cursor:pointer;border:none;">&#8635; Reload Results</button>
+            <a href="visualizer.html" class="visualizer-btn">3D Visualizer</a>
+        </div>
+    </div>
+
+    <!-- Model toggle chips (show/hide columns) -->
+    <div class="model-toggle-bar" id="model-toggle-bar">
+        <span class="label">Models:</span>
+        <!-- chips injected by JS -->
+        <button class="toggle-all-btn" id="toggle-all-btn">Show All</button>
+    </div>
+
+    <!-- Summary cards with collapse toggle -->
+    <div class="summary-section" id="summary-section">
+        <div class="summary-toggle" id="summary-toggle">
+            <span class="arrow open" id="summary-arrow">&#9654;</span>
+            <span class="stitle">Model Summaries</span>
+            <span class="scount" id="summary-count"></span>
+        </div>
+        <div class="summary-row" id="summary-row">
+            <!-- Injected via JS -->
+        </div>
+    </div>
+
+    <!-- Phase filter tabs -->
+    <div class="phase-bar" id="phase-bar">
+        <button class="phase-tab active" data-phase="0">All Phases <span class="badge" id="badge-0">75</span></button>
+        <button class="phase-tab" data-phase="1">Phase 1 &middot; Geometric Forms <span class="badge" id="badge-1">18</span></button>
+        <button class="phase-tab" data-phase="2">Phase 2 &middot; Complex Structures <span class="badge" id="badge-2">18</span></button>
+        <button class="phase-tab" data-phase="3">Phase 3 &middot; Engineering <span class="badge" id="badge-3">18</span></button>
+        <button class="phase-tab" data-phase="4">Phase 4 &middot; Bio-Inspired <span class="badge" id="badge-4">21</span></button>
+    </div>
+
+    <div class="scoreboard-card">
+        <table>
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        Scores dynamically compiled from the showcase_db.js local database mapping. <b>Cov</b> = shape count coverage. <b>Geom</b> = positional &amp; dimensional accuracy. <b>Sem</b> = semantic (subsumes physics: gravity, connectivity, interference + family-specific structural rules). <b>Global</b> = Cov&times;20% + Geom&times;30% + Sem&times;50%.
+    </div>
+
+    <script>
+        // ── Provider helpers ──
+        function getProvider(m) {
+            if (m.startsWith('gemini')) return 'gemini';
+            if (m.startsWith('claude')) return 'claude';
+            if (m.startsWith('deepseek')) return 'deepseek';
+            if (m.startsWith('gpt') || m.startsWith('openai') || m.startsWith('o1') || m.startsWith('o3')) return 'openai';
+            if (m.startsWith('mistral') || m.startsWith('codestral')) return 'mistral';
+            if (m.startsWith('groq')) return 'groq';
+            if (m.startsWith('kimi') || m.startsWith('moonshot')) return 'kimi';
+            return 'custom';
+        }
+        function prettyName(m) {
+            const names = {
+                'gemini-2.5-flash':              'Gemini 2.5 Flash',
+                'gemini-2.5-pro':                'Gemini 2.5 Pro',
+                'gemini-3.1-flash-lite-preview': 'Gemini 3.1 Flash-Lite',
+                'gemini-3-flash-preview':        'Gemini 3 Flash',
+                'gemini-3.1-pro-preview':        'Gemini 3.1 Pro',
+                'claude-opus-4-6':               'Claude Opus 4.6',
+                'claude-sonnet-4-6':             'Claude Sonnet 4.6',
+                'deepseek-chat':                 'DeepSeek V3.2',
+                'deepseek-reasoner':             'DeepSeek R1',
+                'gpt-4.1':                       'GPT-4.1',
+                'gpt-5.4':                       'GPT-5.4',
+                'gpt-5.4-mini':                  'GPT-5.4 Mini',
+                'kimi-k2.5':                     'Kimi K2.5',
+            };
+            return names[m] || m;
+        }
+        function scoreClass(v) { return v > 80 ? 'good' : (v > 40 ? 'warn' : 'bad'); }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!window.SHOWCASE_DB) {
+                document.getElementById('table-body').innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 40px;">Database Not Found. Run: python3 V2/runners/run_unified.py --all</td></tr>`;
+                return;
+            }
+
+            const golden = window.SHOWCASE_DB.golden;
+            const models = window.SHOWCASE_DB.models;
+
+            // Sort models by overall score_global (highest → lowest)
+            function modelAvgGlobal(m) {
+                const entries = (models[m] || []).filter(e => e);
+                if (!entries.length) return 0;
+                return entries.reduce((s, e) => s + (e.score_global || 0), 0) / entries.length;
+            }
+            const modelIds = Object.keys(models).sort((a, b) => modelAvgGlobal(b) - modelAvgGlobal(a));
+
+            // ── Visibility state: default show top 10 models ──
+            const MAX_DEFAULT = 10;
+            const visibleModels = new Set(modelIds.slice(0, MAX_DEFAULT));
+            let showAll = modelIds.length <= MAX_DEFAULT;
+            if (showAll) modelIds.forEach(m => visibleModels.add(m));
+
+            // ── Build model toggle chips ──
+            const toggleBar = document.getElementById('model-toggle-bar');
+            const toggleAllBtn = document.getElementById('toggle-all-btn');
+
+            modelIds.forEach(m => {
+                const chip = document.createElement('span');
+                chip.className = 'model-chip' + (visibleModels.has(m) ? ' active' : '');
+                chip.dataset.model = m;
+                const prov = getProvider(m);
+                chip.innerHTML = `<span class="chip-dot dot-${prov}"></span>${prettyName(m)}`;
+                chip.addEventListener('click', () => {
+                    if (visibleModels.has(m)) { visibleModels.delete(m); chip.classList.remove('active'); }
+                    else { visibleModels.add(m); chip.classList.add('active'); }
+                    applyColumnVisibility();
+                });
+                toggleBar.insertBefore(chip, toggleAllBtn);
+            });
+
+            toggleAllBtn.textContent = showAll ? 'Hide Extras' : `Show All (${modelIds.length})`;
+            toggleAllBtn.addEventListener('click', () => {
+                showAll = !showAll;
+                if (showAll) {
+                    modelIds.forEach(m => visibleModels.add(m));
+                    toggleBar.querySelectorAll('.model-chip').forEach(c => c.classList.add('active'));
+                } else {
+                    visibleModels.clear();
+                    modelIds.slice(0, MAX_DEFAULT).forEach(m => visibleModels.add(m));
+                    toggleBar.querySelectorAll('.model-chip').forEach(c =>
+                        c.classList.toggle('active', visibleModels.has(c.dataset.model)));
+                }
+                toggleAllBtn.textContent = showAll ? 'Hide Extras' : `Show All (${modelIds.length})`;
+                applyColumnVisibility();
+            });
+
+            function applyColumnVisibility() {
+                modelIds.forEach((m, ci) => {
+                    const colClass = `col-m-${ci}`;
+                    const hide = !visibleModels.has(m);
+                    document.querySelectorAll(`.${colClass}`).forEach(el =>
+                        el.classList.toggle('col-hidden', hide));
+                });
+                // Update summary card visibility
+                document.querySelectorAll('.summary-card[data-model]').forEach(card =>
+                    card.style.display = visibleModels.has(card.dataset.model) ? '' : 'none');
+            }
+
+            // ── Summary toggle ──
+            let summaryOpen = true;
+            const summaryToggle = document.getElementById('summary-toggle');
+            const summaryRow = document.getElementById('summary-row');
+            const summaryArrow = document.getElementById('summary-arrow');
+            document.getElementById('summary-count').textContent = `(${modelIds.length} models)`;
+
+            summaryToggle.addEventListener('click', () => {
+                summaryOpen = !summaryOpen;
+                summaryRow.classList.toggle('collapsed', !summaryOpen);
+                summaryArrow.classList.toggle('open', summaryOpen);
+            });
+
+            // ── Build Summary Cards ──
+            function phaseAvg(entries, key) {
+                return Math.round(entries.reduce((s,d) => s + (d[key]||0), 0) / entries.length);
+            }
+            function globalClass(v) { return v > 80 ? 'global-good' : (v > 40 ? 'global-warn' : 'global-bad'); }
+
+            modelIds.forEach(m => {
+                const prov = getProvider(m);
+                const data = models[m] || [];
+                const phaseLabels = { 1:'P1', 2:'P2', 3:'P3', 4:'P4' };
+
+                let aggHTML = '';
+                [1, 2, 3, 4].forEach(phase => {
+                    const pd = data.filter(d => d && d.phase === phase);
+                    if (pd.length === 0) return;
+                    const avgC = phaseAvg(pd, 'score_cov');
+                    const avgG = phaseAvg(pd, 'score_geom');
+                    const avgS = phaseAvg(pd, 'score_sem');
+                    const avgGl = phaseAvg(pd, 'score_global');
+                    aggHTML += `<div style="margin-bottom:6px;">
+                        <span style="color:#94a3b8;font-size:10px;font-weight:600;letter-spacing:0.5px;">${phaseLabels[phase]}</span>
+                        <span class="agg-pill ${scoreClass(avgC)}">Cov ${avgC}%</span>
+                        <span class="agg-pill ${scoreClass(avgG)}">Geom ${avgG}%</span>
+                        <span class="agg-pill ${scoreClass(avgS)}">Sem ${avgS}%</span>
+                        <span class="agg-pill ${globalClass(avgGl)}">&oplus;${avgGl}%</span>
+                    </div>`;
+                });
+                const allEntries = data.filter(d => d);
+                let overallHTML = '';
+                if (allEntries.length > 0) {
+                    const oC  = phaseAvg(allEntries, 'score_cov');
+                    const oG  = phaseAvg(allEntries, 'score_geom');
+                    const oS  = phaseAvg(allEntries, 'score_sem');
+                    const oGl = phaseAvg(allEntries, 'score_global');
+                    overallHTML = `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+                        <span class="agg-pill ${scoreClass(oC)}" style="font-size:11px;">Cov ${oC}%</span>
+                        <span class="agg-pill ${scoreClass(oG)}" style="font-size:11px;">Geom ${oG}%</span>
+                        <span class="agg-pill ${scoreClass(oS)}" style="font-size:11px;">Sem ${oS}%</span>
+                        <span class="global-pill ${globalClass(oGl)}" style="font-size:12px;">&oplus; ${oGl}%</span>
+                    </div>`;
+                }
+                if (!aggHTML) aggHTML = '<span style="color:#64748b;font-size:12px;">No results yet</span>';
+
+                const card = document.createElement('div');
+                card.className = 'summary-card';
+                card.dataset.model = m;
+                card.style.display = visibleModels.has(m) ? '' : 'none';
+                card.innerHTML = `
+                    <div class="model-name">
+                        <span class="provider-dot dot-${prov}"></span>
+                        ${prettyName(m)}
+                    </div>
+                    <div class="agg-scores">${aggHTML}</div>
+                    ${overallHTML}`;
+                summaryRow.appendChild(card);
+            });
+
+            // ── Build Table Header ──
+            const thead = document.getElementById('table-head');
+            let headHTML = `<tr><th style="min-width:220px">Benchmark Structure</th>`;
+            modelIds.forEach((m, ci) => {
+                const prov = getProvider(m);
+                const hidden = !visibleModels.has(m) ? ' col-hidden' : '';
+                headHTML += `<th class="col-m-${ci}${hidden}">
+                    <div class="th-model">
+                        <span class="provider-dot dot-${prov}"></span>
+                        <span class="th-model-name">${prettyName(m)}</span>
+                    </div>
+                </th>`;
+            });
+            headHTML += `</tr>`;
+            thead.innerHTML = headHTML;
+
+            // ── Build Table Body (collapsible families) ──
+            const tbody = document.getElementById('table-body');
+
+            // Group golden entries by family
+            const familyGroups = [];
+            let curFamily = null;
+            golden.forEach((test, idx) => {
+                if (!curFamily || curFamily.name !== test.family) {
+                    curFamily = { name: test.family, phase: test.phase, entries: [] };
+                    familyGroups.push(curFamily);
+                }
+                curFamily.entries.push({ test, idx });
+            });
+
+            function getGlobalPill(mdl, idx) {
+                if (!models[mdl] || !models[mdl][idx]) return `<span style="color:#475569">—</span>`;
+                const gl = models[mdl][idx].score_global || 0;
+                return `<span class="score-pill ${scoreClass(gl)}" style="font-size:13px;font-weight:800">${gl}%</span>`;
+            }
+
+            function getDetailHTML(mdl, idx) {
+                if (!models[mdl] || !models[mdl][idx]) return `<span style="color:#64748b">-</span>`;
+                const ai = models[mdl][idx];
+                const gl = ai.score_global || 0;
+                return `<div style="display:flex; flex-direction:column; gap:3px;">
+                    <div class="score-box"><span class="score-label">Cov</span><span class="score-pill ${scoreClass(ai.score_cov||0)}">${ai.score_cov||0}%</span></div>
+                    <div class="score-box"><span class="score-label">Geom</span><span class="score-pill ${scoreClass(ai.score_geom||0)}">${ai.score_geom||0}%</span></div>
+                    <div class="score-box"><span class="score-label">Sem</span><span class="score-pill ${scoreClass(ai.score_sem||0)}">${ai.score_sem||0}%</span></div>
+                    <div class="score-box" style="margin-top:2px;border-top:1px solid rgba(255,255,255,0.08);padding-top:3px;">
+                        <span class="score-label" style="font-weight:700;color:#94a3b8;">&oplus;</span>
+                        <span class="score-pill ${scoreClass(gl)}" style="font-size:13px;">${gl}%</span>
+                    </div>
+                </div>`;
+            }
+
+            const phaseLabels = { 1:'Phase 1 &middot; Geometric Forms', 2:'Phase 2 &middot; Complex Structures', 3:'Phase 3 &middot; Engineering', 4:'Phase 4 &middot; Bio-Inspired' };
+            const phaseColors = { 1:'#60a5fa', 2:'#c084fc', 3:'#f59e0b', 4:'#34d399' };
+            let html = "";
+            let lastPhase = 0;
+            let familyIdx = 0;
+
+            familyGroups.forEach((fam) => {
+                // Phase header row
+                if (fam.phase !== lastPhase) {
+                    html += `<tr class="phase-group-hdr" data-phase="${fam.phase}">
+                        <td colspan="${modelIds.length+1}" style="color:${phaseColors[fam.phase]}">${phaseLabels[fam.phase]}</td>
+                    </tr>`;
+                    lastPhase = fam.phase;
+                }
+
+                const fid = `fam-${familyIdx}`;
+                const phaseClass = `phase-${fam.phase}`;
+                const nLevels = fam.entries.length;
+
+                // Compute average global per model for this family
+                html += `<tr class="family-row" data-phase="${fam.phase}" data-fid="${fid}" onclick="window._toggleFamily('${fid}')">
+                    <td>
+                        <span class="expand-arrow">&#9654;</span>
+                        <span class="family-name">${fam.name}<span class="phase-tag ${phaseClass}">P${fam.phase}</span></span>
+                        <span style="font-size:10px;color:#475569;margin-left:6px;">${nLevels} levels</span>
+                    </td>`;
+                modelIds.forEach((m, ci) => {
+                    const hidden = !visibleModels.has(m) ? ' col-hidden' : '';
+                    // Average global across levels for this family
+                    let sum = 0, count = 0;
+                    fam.entries.forEach(({idx}) => {
+                        if (models[m] && models[m][idx]) {
+                            sum += (models[m][idx].score_global || 0);
+                            count++;
+                        }
+                    });
+                    const avg = count > 0 ? Math.round(sum / count) : 0;
+                    const hasData = count > 0 && sum > 0;
+                    html += `<td class="col-m-${ci}${hidden}" style="text-align:center;">
+                        ${hasData
+                            ? `<span class="global-pill ${globalClass(avg)}" style="font-size:13px;">&oplus; ${avg}%</span>`
+                            : `<span style="color:#475569">—</span>`}
+                    </td>`;
+                });
+                html += `</tr>`;
+
+                // Detail rows (hidden by default) — one per difficulty level
+                fam.entries.forEach(({test, idx}) => {
+                    html += `<tr class="detail-row" data-phase="${fam.phase}" data-fid="${fid}">
+                        <td style="padding-left:36px;">
+                            <div class="diff-label" style="color:#94a3b8">${test.difficultyLabel}</div>
+                        </td>`;
+                    modelIds.forEach((m, ci) => {
+                        const hidden = !visibleModels.has(m) ? ' col-hidden' : '';
+                        html += `<td class="col-m-${ci}${hidden}">${getDetailHTML(m, idx)}</td>`;
+                    });
+                    html += `</tr>`;
+                });
+
+                familyIdx++;
+            });
+
+            tbody.innerHTML = html;
+
+            // ── Phase tab filtering ──
+            let activePhase = 0;
+            function applyPhaseFilter(phase) {
+                activePhase = phase;
+                document.querySelectorAll('#phase-bar .phase-tab').forEach(t =>
+                    t.classList.toggle('active', parseInt(t.dataset.phase) === phase));
+                // Handle phase-group headers, family rows, and detail rows separately
+                tbody.querySelectorAll('tr[data-phase]').forEach(row => {
+                    const rp = parseInt(row.dataset.phase);
+                    const phaseOk = phase === 0 || rp === phase;
+                    if (row.classList.contains('detail-row')) {
+                        // Detail rows: visible only if phase matches AND family is expanded
+                        const fid = row.dataset.fid;
+                        const famRow = tbody.querySelector(`.family-row[data-fid="${fid}"]`);
+                        const isExpanded = famRow && famRow.classList.contains('expanded');
+                        row.classList.toggle('visible', phaseOk && isExpanded);
+                        row.style.display = '';  // let CSS class control visibility
+                    } else {
+                        // Family rows + phase group headers: show/hide by phase
+                        row.style.display = phaseOk ? '' : 'none';
+                    }
+                });
+            }
+            document.querySelectorAll('#phase-bar .phase-tab').forEach(tab =>
+                tab.addEventListener('click', () => applyPhaseFilter(parseInt(tab.dataset.phase))));
+
+            // ── Toggle family expand/collapse ──
+            window._toggleFamily = function(fid) {
+                const famRow = tbody.querySelector(`.family-row[data-fid="${fid}"]`);
+                if (!famRow) return;
+                const isExpanded = famRow.classList.toggle('expanded');
+                const detailRows = tbody.querySelectorAll(`.detail-row[data-fid="${fid}"]`);
+                detailRows.forEach(row => {
+                    const rp = parseInt(row.dataset.phase);
+                    const phaseOk = activePhase === 0 || rp === activePhase;
+                    row.classList.toggle('visible', isExpanded && phaseOk);
+                });
+            };
+        });
+    </script>
+</body>
+</html>
