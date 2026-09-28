@@ -1,0 +1,106 @@
+{
+ "main": {
+  "cases": 75,
+  "families": 25,
+  "parts_min": 5,
+  "parts_median": 30.0,
+  "parts_max": 805,
+  "parts_total": 5042,
+  "constraints": 25371,
+  "constraints_by_kind": {
+   "dimension": 12402,
+   "orientation": 1561,
+   "anchor": 551,
+   "mate": 5537,
+   "pattern": 4678,
+   "topology": 642
+  },
+  "types": {
+   "cylinder": 689,
+   "beam": 2265,
+   "sphere": 1160,
+   "box": 237,
+   "pipe": 160,
+   "torus": 85,
+   "cone": 446
+  },
+  "references_exact": 75
+ },
+ "sweep": {
+  "cases": 121,
+  "families": 19,
+  "parts_min": 3,
+  "parts_median": 32.0,
+  "parts_max": 701,
+  "parts_total": 8024,
+  "constraints": 48528,
+  "constraints_by_kind": {
+   "dimension": 20219,
+   "orientation": 3123,
+   "anchor": 1259,
+   "mate": 14346,
+   "pattern": 9577,
+   "topology": 4
+  },
+  "types": {
+   "cylinder": 1428,
+   "beam": 3121,
+   "sphere": 2087,
+   "pipe": 343,
+   "torus": 99,
+   "box": 495,
+   "cone": 451
+  },
+  "references_exact": 121
+ },
+ "heldout": {
+  "cases": 48,
+  "families": 8,
+  "parts_min": 7,
+  "parts_median": 21.0,
+  "parts_max": 64,
+  "parts_total": 1252,
+  "constraints": 7948,
+  "constraints_by_kind": {
+   "dimension": 3720,
+   "orientation": 558,
+   "anchor": 426,
+   "mate": 1436,
+   "pattern": 1808
+  },
+  "types": {
+   "cylinder": 292,
+   "beam": 454,
+   "sphere": 216,
+   "box": 198,
+   "pipe": 36,
+   "torus": 56
+  },
+  "references_exact": 48
+ },
+ "sentences": {
+  "total": 786,
+  "constraint keys": 642,
+  "ids": 99,
+  "symbolic": 33,
+  "note": 12
+ },
+ "cml_gated_families": [
+  "Axle Bearing",
+  "BCC Lattice",
+  "Ball Bearing Assembly",
+  "Cannonball Pyramid",
+  "Clock Tower Mechanism",
+  "DNA Helix",
+  "Domino Ring",
+  "Flanged Pipe Joint",
+  "Fractal Y-Tree",
+  "Furniture Assembly",
+  "Gantry Crane Assembly",
+  "Pipe Manifold",
+  "Planetary Array",
+  "Spiral Staircase",
+  "Suspension Bridge",
+  "Voxel Grid"
+ ]
+}

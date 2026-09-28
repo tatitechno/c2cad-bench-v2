@@ -87,7 +87,7 @@ Documented patches. Each fixes a verified disagreement; the user may veto the on
 Script: `pytest -q v2/tests` → 842 passed (at the time of the last notebook update)
 - 75/75 references score 100 on every axis.
 - 75/75 are invariant to shuffling and renumbering.
-- 24,579 constraints in total. Each has a clause, a kind and valid roles, and the reference satisfies all of them.
+- 25,371 constraints in total (E09, `experiments/e09_inventory.py`; the earlier figure of 24,579 had no saved script and no longer matches the builders). Each has a clause, a kind and valid roles, and the reference satisfies all of them.
 - Geometry decreases monotonically under jitter.
 - The equivalence view is never below the label-strict view.
 - The `{"shapes": [...]}` wrapper is accepted. Out-of-schema types are dropped and counted.
@@ -156,7 +156,7 @@ Metrics compared: 96³ voxel IoU, Chamfer distance divided by the reference diag
 - **Case level** (Spearman, n = 897): Geometry vs IoU 0.807, vs F@2% 0.816, vs Chamfer 0.753. Semantic vs IoU 0.823. Coverage vs IoU only 0.484.
 - **Model level** (ρ against Global_v2): IoU 0.896, F@2% 0.951, Chamfer 0.918, orientation error 0.736.
 - **Where they disagree, and why component-level scoring matters:**
-  - 31.0% of outputs have F@2% ≥ 0.9 but are not exact: a stated constraint is violated or the part count differs.
+  - 31.7% (284/897) of outputs have F@2% ≥ 0.9 but are not exact: a stated constraint is violated or the part count differs.
   - 6.0% have IoU ≥ 0.8 with Sem < 60. Example: the *released record* for kimi-k2.5 on clock L1 contains only 2 of 12 parts (back plate and shaft), yet scores IoU 0.92 and F@2% 1.00, because the plate dominates the volume. Whether the raw response had more parts is unknown (see the caveat above).
   - 2.3% have IoU < 0.3 with Geom ≥ 80. Example: ball-bearing L2, where the released records of five models contain all 12 balls, exactly placed, but neither race (2 parts, about 90% of the volume): IoU 0.09, Geom 85.7.
 
@@ -221,7 +221,7 @@ Modules: `v2/c2cad/dsl.py` (language reference and interpreter), `v2/c2cad/cml_p
 | Plus counts (row sizes, n+1 columns) | Pyramid, BCC, Gantry |
 | Plus simple fractions or halves | Domino (the half-angle 3°), Bridge (i/(n−1) attachment fractions), Furniture (k/(P+1) stations) |
 | Plus domain knowledge | Clock ("eleven o'clock" → 120°) |
-| Not yet written | Phyllotaxis (Fermat law), Cochlea (taper law), Radiolarian (geodesic refinement), Vertebral (accumulated tilt), Compound Eye (70k/R polar angles), Armillary (φ-based directions), Diatom and Honeycomb (many derived offsets) |
+| Not yet written | Phyllotaxis (Fermat law), Cochlea (taper law), Radiolarian (geodesic refinement), Vertebral (accumulated tilt), Compound Eye (70k/R polar angles), Armillary (φ-based directions), Diatom and Honeycomb (many derived offsets), Cross-Braced Truss (not yet attempted; E09 lists the 16 gated families) |
 
 - **Summary of the table.** 9 families need only prompt numbers, 6 also need counts or simple fractions, and 1 (Clock) needs one domain convention (11 o'clock → 120°). The remaining 9 families are not yet written.
 - **Why this matters for the paper.** Generic CAD vocabulary covers regular engineering assemblies with prompt numbers alone; growth laws are where it stops helping. Comparing the `mates` arm with the `tool` arm will show whether computing coordinates is the bottleneck (mates ≈ tool > json) or whether a relational interface helps beyond arithmetic (mates > tool).
@@ -367,7 +367,7 @@ Script: `v2/experiments/e08_kernel_roundtrip.py` → `results/e08_kernel_roundtr
 - [ ] Live runs (`RUNBOOK.md`): confirm the unverified registry entries, smoke each profile, then run main, repair, sweep and held-out.
 - [ ] Decisions: sign-off on the (P) patches and the contract; the Axle Bearing levels (still 5 parts each); the decomposition merge pass; the phase-5/6 families; the roster and reasoning settings; the budget.
 - [ ] Render symbolic parts translucent (Compound Eye's dome hides the units).
-- [ ] Remaining CML programs (8 families) to complete the expressibility table (offline; does not affect the runs).
+- [ ] Remaining CML programs (9 families, per E09) to complete the expressibility table (offline; does not affect the runs).
 - [ ] Human rating kit (sample, renders, form) and an independent audit of the trace map.
 - [ ] Hand review of the high-overlap prompts (E00).
 - [ ] Paper draft from `PAPER_OUTLINE.md`.

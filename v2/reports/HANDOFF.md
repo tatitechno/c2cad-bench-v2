@@ -53,7 +53,7 @@ Start a new session by reading this file, then `v2/reports/LAB_NOTEBOOK.md` (eve
 4. **Runs:** main (8 arms, k = 3), then repair, then sweep, then held-out, then continuity. Run all models within the same window.
 5. `python -m analysis.make_all`. Then fill the paper from `PAPER_OUTLINE.md` using the macros.
 6. **Offline, any time:**
-   - the remaining CML programs (8 families; expressibility table);
+   - the remaining CML programs (9 families, per E09; expressibility table);
    - the human rating kit and study;
    - an independent audit of the trace map;
    - the hand review of the high-overlap prompts (E00);

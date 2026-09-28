@@ -1,0 +1,539 @@
+% C2CAD-Bench v2: what is new in the repository (internal technical report).
+% Compile: pdflatex v2_repository_report.tex (twice, for references), or upload to Overleaf.
+% Every number below is printed by the saved script named next to it (v2/experiments/, v2/reports/results/);
+% no number is carried over from the rejected paper or its rebuttal.
+\documentclass[10pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+\setlist{nosep,leftmargin=1.4em}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcommand{\file}[1]{\path{#1}}
+\newcommand{\stDone}{\textcolor{green!45!black}{done}}
+\newcommand{\stRuns}{\textcolor{orange!85!black}{live runs}}
+\newcommand{\stOpen}{\textcolor{red!70!black}{open}}
+\renewcommand{\arraystretch}{1.15}
+
+\title{C2CAD-Bench v2: What Is New in the Repository\\[2pt]
+\large Internal technical report on the rebuilt benchmark, its scorer, its experiment machinery and its analysis plan}
+\author{C2CAD-Bench maintainers}
+\date{28 September 2026 \quad(repository state: branch \texttt{main}, before any live model run)}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent C2CAD-Bench v1 was rejected at the NeurIPS 2026 Evaluations \& Datasets track. Reviewers found:
+\begin{itemize}
+\item the ``zero-scaffolding'' claim was false;
+\item the scorer was unvalidated;
+\item the isolation of spatial reasoning was asserted rather than shown;
+\item the rebuttal's new evidence never reached the paper.
+\end{itemize}
+This report describes the v2 package that now sits beside the frozen v1 artifact:
+\begin{itemize}
+\item a re-specified case set, with prompt audits enforced by tests;
+\item a scorer that every reference passes at 100, and whose validity is measured before use;
+\item reference-free, clause-traced constraints;
+\item held-out and scale splits;
+\item ten experimental arms that attribute failures to specific sub-skills, including the CAD-code and constrained-decoding conditions promised in the rebuttal;
+\item a hardened runner for live API runs;
+\item an analysis plan fixed before any data;
+\item a one-command analysis pipeline that writes every paper number as a \LaTeX{} macro.
+\end{itemize}
+The repository is ready for the live runs; no paid request has been made yet.
+\end{abstract}
+
+\tableofcontents
+\bigskip
+
+% ---------------------------------------------------------------------------------------------------------
+\section{Summary of what changed}
+\begin{itemize}
+\item \textbf{v1 is frozen; v2 is new.} Nothing in \file{runners/}, \file{data/}, \file{results/} or the reference code in \file{stages/} was modified. All new work lives in \file{v2/}. v1's own tests still pass (11).
+\item \textbf{Prompts.} The released v1 prompts leaked totals, formulas and coordinates.
+  \begin{itemize}
+  \item The v1 audit regexes flag 60 of the 75 v1 prompts and 0 of the 75 v2 prompts (E00).
+  \item A test now enforces this as a strict CI gate over the task text of every arm.
+  \end{itemize}
+\item \textbf{Scorer.}
+  \begin{itemize}
+  \item One normalizer for both sides, optimal (Hungarian) matching, and a pose gate.
+  \item A reference-free semantic layer of 25{,}371 constraints, each tied to a prompt sentence (E09).
+  \item No hidden calibration exponent. All 75 references score 100 on every axis, and the scores are invariant to order and ids.
+  \end{itemize}
+\item \textbf{Validity measured before use:}
+  \begin{itemize}
+  \item controlled corruptions (E02);
+  \item 20 scorer variants (E04);
+  \item agreement with IoU, Chamfer and F-score (E05);
+  \item an independently written matcher (E07);
+  \item a CAD-kernel round trip (E08).
+  \end{itemize}
+\item \textbf{Splits.}
+  \begin{itemize}
+  \item Main: 75 cases.
+  \item Scale sweep: 121 cases, from 3 to 701 parts.
+  \item Held-out: 48 cases with new values, mirrored handedness and rotated anchors. The memorized answer fails every one.
+  \end{itemize}
+\item \textbf{Ten arms}, each changing one factor: json, neutral, tool, v1, mates, schema, cadquery, probe, repair\_generic and repair\_verifier.
+\item \textbf{Live-run machinery:}
+  \begin{itemize}
+  \item retries, streaming and resume;
+  \item a cost guard metered from provider usage;
+  \item a smoke gate and file-locked records;
+  \item offline re-scoring;
+  \item a model registry with sources.
+  \end{itemize}
+\item \textbf{Analysis.}
+  \begin{itemize}
+  \item A pre-registered plan (\file{v2/reports/ANALYSIS_PLAN.md}) with eight hypotheses and decision rules, dated in git before any data.
+  \item A pipeline (\texttt{python -m analysis.make\_all}), tested end to end on mock runs.
+  \end{itemize}
+\item \textbf{Reviewer commitments.} Every commitment made in the rebuttal is mapped to its v2 status in \file{v2/reports/REBUTTAL_TRACKER.md}.
+\item \textbf{Tests:} 1{,}097 pass for v2 (\texttt{pytest -q v2/tests}).
+\end{itemize}
+
+% ---------------------------------------------------------------------------------------------------------
+\section{Why v2: defects found in v1}
+The v1 defects that drove the rebuild:
+\begin{itemize}
+\item \textbf{Validators contradicted their own references} (E01, \file{v2/experiments/e01_v1_validator_golden_audit.py}).
+  \begin{itemize}
+  \item In 18 of 25 families, the reference answer scores below 0.999 on its own v1 semantic validator at one or more levels.
+  \item Every failing sub-check that could be instrumented is a validator bug. Examples: spacing uniformity computed over paired spheres that share a height; the deck taken to be the longest beam although the cables are longer; tangent contacts counted as interference.
+  \item v1 hid this by dividing every model's score by the reference's raw score.
+  \end{itemize}
+\item \textbf{Released scores and type confusions do not reproduce} (E03, \file{v2/experiments/e03_rescore_v1_outputs.py}).
+  \begin{itemize}
+  \item Re-scoring the 897 comparable released outputs with v2 gives Spearman $\rho=0.868$ (Kendall $\tau=0.718$) against the v1 model ranking. The top three are unchanged.
+  \item The real dominant type substitution is beam$\rightarrow$box: 2{,}049 of 2{,}541 matched pairs, co-located. The paper's ``beam$\rightarrow$sphere 8{,}644'' does not reproduce.
+  \end{itemize}
+\item \textbf{Scorer bugs} recorded in the lab notebook and the resubmission plan:
+  \begin{itemize}
+  \item references that do not score 100 against themselves;
+  \item order-dependent greedy matching;
+  \item a calibration exponent applied to some families only;
+  \item unrecognised types passing normalization.
+  \end{itemize}
+  All are fixed by construction in v2 and guarded by tests. \emph{Their counts come from an earlier, unsaved check and are not quoted here.}
+\end{itemize}
+
+% ---------------------------------------------------------------------------------------------------------
+\section{Repository layout}
+\begin{table}[h]\small
+\begin{tabularx}{\linewidth}{@{}lL@{}}
+\toprule
+Path & Contents \\ \midrule
+\file{v2/c2cad/cases.py} & v2 case set: generator prompts, the shared output contract, documented patches \\
+\file{v2/c2cad/geom.py}, \file{score.py} & one normalizer for both sides; Coverage and Geometry with optimal assignment \\
+\file{v2/c2cad/constraints/} & reference-free constraints per family, each traced to a prompt sentence (\file{trace.py}) \\
+\file{v2/c2cad/evaluate.py} & one evaluation entry point; the reference-free verifier \texttt{verify()} \\
+\file{v2/c2cad/heldout.py} & held-out generators (new values, mirrored handedness, rotated anchors) \\
+\file{v2/c2cad/dsl.py}, \file{cml_programs.py} & CML mates-and-patterns language, its interpreter, and 16 gate programs \\
+\file{v2/c2cad/cadkernel.py}, \file{cadcode.py}, \file{prism.py} & CAD-kernel bridge: JSON$\rightarrow$solid converter, B-Rep recovery, CadQuery emitter, reading of label-free prisms \\
+\file{v2/c2cad/partlevel.py}, \file{metrics3d.py} & named-part metrics (probe arm); IoU, Chamfer, F-score, orientation (axis and OBB) \\
+\file{v2/c2cad/runner/} & providers, arms, sandbox, mock, runner, offline rescore \\
+\file{v2/config/models.json} & model registry: ids, output caps, reasoning settings, prices, sources, verification status \\
+\file{v2/experiments/e00..e09} & one script per experiment; outputs in \file{v2/reports/results/} \\
+\file{v2/analysis/} & the pre-registered analysis (a01--a06, figures, \LaTeX{} macros) \\
+\file{v2/data/} & \file{cases_v2.jsonl}, \file{sweep_v2.jsonl}, \file{heldout_v2.jsonl} \\
+\file{v2/reports/} & lab notebook, handoff, outline, prior art, analysis plan, rebuttal tracker, atlas, this report \\
+\file{v2/RUNBOOK.md} & how to run everything, with the cost table \\
+\file{v2/tests/} & 1{,}097 tests (scorer validity; runner, arms, kernel, analysis) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ---------------------------------------------------------------------------------------------------------
+\section{The v2 benchmark}
+\subsection{Case set and output contract}
+\begin{itemize}
+\item \textbf{Prompts.} The 75 main cases (25 families $\times$ 3 scale levels) use the rewritten v2 prompts. They carry relations and base values only.
+\item \textbf{Output contract.} Each generator's own output suffix is replaced by one shared contract that fixes:
+  \begin{itemize}
+  \item the field names of the seven primitives (box, cylinder, pipe, cone, sphere, torus, beam);
+  \item the unit (millimetres);
+  \item the conventions, e.g.\ \texttt{center} is the midpoint of the axial extent, and a cone's axis points from base to tip.
+  \end{itemize}
+  Neither v1 nor the v2 generator prompts ever stated field names.
+\item \textbf{Documented patches.} Deviations from the generators are explicit, documented patches in \file{cases.py}:
+  \begin{itemize}
+  \item the Suspension Bridge id order and deck section;
+  \item the Flanged nut axis;
+  \item Axle Bearing: bearings moved outside the block, shaft protrusion 20 (this changes the prompt text);
+  \item Honeycomb: the central cell's elevation stated (this changes the prompt text), and the link id order.
+  \end{itemize}
+  The two prompt changes await the author's sign-off.
+\end{itemize}
+
+\subsection{Splits (E09)}
+\begin{table}[h]\small\centering
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+split & cases & families & parts min & median & max & total parts & constraints & references exact \\ \midrule
+main & 75 & 25 & 5 & 30 & 805 & 5{,}042 & 25{,}371 & 75/75 \\
+sweep & 121 & 19 & 3 & 32 & 701 & 8{,}024 & 48{,}528 & 121/121 \\
+held-out & 48 & 8 & 7 & 21 & 64 & 1{,}252 & 7{,}948 & 48/48 \\
+\bottomrule
+\end{tabular}
+\caption{Inventory (\file{v2/experiments/e09_inventory.py}).}
+\end{table}
+
+\begin{itemize}
+\item \textbf{Sweep.} The same prompt templates at part counts not used in the main set. It supports per-model breaking-size curves. Reviewers were right that the levels measure scale, not generalization.
+\item \textbf{Held-out.} Every base dimension is changed, and most variants also mirror the handedness and rotate the first-element anchor.
+  \begin{itemize}
+  \item Tests check that the held-out generators reproduce the main prompts \emph{exactly} at the default parameters.
+  \item Tests also check that the memorized default answer fails every held-out case.
+  \end{itemize}
+\end{itemize}
+
+\subsection{Prompt audit (E00)}
+\begin{table}[h]\small\centering
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+prompt set & high-risk & shape count & coordinate vector & formula/assignment & trig/Cartesian \\ \midrule
+v1 released (75) & 60 & 48 & 27 & 9 & 18 \\
+v2 task text (75) & 0 & 0 & 0 & 0 & 0 \\
+task text of every v2 arm (75 each) & 0 & 0 & 0 & 0 & 0 \\
+\bottomrule
+\end{tabular}
+\caption{The released v1 regexes (\file{scripts/audit_prompts.py}, unchanged) applied by \file{v2/experiments/e00_prompt_audit.py}.}
+\end{table}
+
+\begin{itemize}
+\item \textbf{Verbatim coordinate overlap.} This is the share of nonzero reference coordinate components found as numbers in the prompt. By occurrence it falls from 22.7\% (v1) to 13.2\% (v2); by distinct value per case, from 10.5\% to 7.2\%.
+\item \textbf{Families left for hand review:} Gantry (71.4\%), Pipe Manifold (51.2\%), Suspension Bridge (50.0\%) and Honeycomb (40.8\%). What remains there is mostly base inputs that coincide with coordinates.
+\item \textbf{Shared instruction blocks} (the output contract, the CadQuery instruction, the mates language reference) are audited once. Their only regex matches are the literal \verb|[...]|, the dict index \verb|parts[0]|, and the worked examples of assemblies outside the benchmark.
+\end{itemize}
+
+\subsection{Traceability (E09)}
+\begin{itemize}
+\item \textbf{Every prompt sentence is traced.} The 75 main prompts have 786 sentences:
+  \begin{itemize}
+  \item 642 are traced to constraint keys;
+  \item 99 to an id-ordering rule only;
+  \item 33 to a symbolic declaration only;
+  \item 12 to a note only;
+  \item none untraced (a test enforces this).
+  \end{itemize}
+\item \textbf{Every constraint is traced back.} A second test checks that every constraint key a builder emits is stated in at least one prompt sentence.
+\item \textbf{By kind} (main split): 12{,}402 dimension, 5{,}537 mate, 4{,}678 pattern, 1{,}561 orientation, 642 topology and 551 anchor.
+\item \textbf{Caveats.}
+  \begin{itemize}
+  \item The trace map and the builders have a single author; an independent audit is still to do.
+  \item In three families (Pyramid, Truss, Fractal), \emph{which} roles relate is taken from the reference. Residuals never use reference coordinates.
+  \end{itemize}
+\end{itemize}
+
+% ---------------------------------------------------------------------------------------------------------
+\section{The v2 scorer}
+\begin{itemize}
+\item \textbf{Normalizer.} The same normalizer is applied to the reference and to the output. It reads Euler rotations when no axis is given, ignores box rotations (boxes are axis-aligned by schema), and drops out-of-schema types. Each of these actions is counted.
+\item \textbf{Coverage} $=100\cdot\min(n,N)/\max(n,N)$. It is symmetric, so missing and excess parts cost alike.
+\item \textbf{Geometry.} An optimal one-to-one assignment. A pair scores
+  \[ \text{pos}\cdot\text{ori}\cdot\bigl(0.4+0.2\,\text{type}+0.4\,\text{dims}\bigr), \]
+  where
+  \begin{itemize}
+  \item $\text{pos}=\max\!\bigl(0,1-d/(1.5\tau)\bigr)$ with $\tau=\max(2\,\text{mm},\,5\%\text{ of the reference diagonal})$;
+  \item $\text{ori}=1-\min(1,\theta/45^\circ)$.
+  \end{itemize}
+  Type and shape credit therefore count only where the part is placed. Under v1's additive form, randomly placed parts kept 60\% of the credit.
+\item \textbf{Geometry-equivalent} additionally scores an axis-aligned beam and a box of equal extents as the same solid. It never lowers a pair's score (a test enforces this).
+\item \textbf{Semantic} is the mean over prompt clauses of the fraction of that clause's constraints satisfied.
+  \begin{itemize}
+  \item Tolerances: length $\max(0.25\,\text{mm}, 0.2\%$ of the diagonal$)$, angle $0.5^\circ$, dimensions 1\% relative.
+  \item Roles are bound by the optimal assignment. Binding by the output's own ids is reported separately.
+  \end{itemize}
+\item \textbf{Global} $=$ mean(Coverage, Geometry, Semantic), with no gates and no calibration. \textbf{Exact} means every constraint is satisfied and the part count is exact. The paper leads with the components and with Exact.
+\item \textbf{New in this release:}
+  \begin{itemize}
+  \item \emph{Label-free prisms} (\file{prism.py}). A rectangular solid built in CAD has no box/beam label and no centerline. The evaluator reads it as the best-fitting of an axis-aligned box or a beam along one of its three axes; the occupied volume is identical for every reading.
+  \item \emph{Reference-free verifier} (\texttt{evaluate.verify}). Parts are bound by the output's own ids. It reports the violated prompt sentences with the offending ids, the missing ids and the implied part count, and uses no reference coordinates. It is silent on all 75 references (test).
+  \item \emph{OBB orientation error} (\texttt{metrics3d.orientation\_error\_obb}). It is defined for every matched pair whatever the types, so an oriented beam answered by an axis-aligned box counts as the orientation error it is.
+  \end{itemize}
+\end{itemize}
+
+% ---------------------------------------------------------------------------------------------------------
+\section{Validity evidence already in hand}
+\subsection{Response to controlled corruptions (E02)}
+\begin{table}[h]\small\centering
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+rewrite of the reference & Cov & Geom & GeomEq & Sem & Global & exact \% \\ \midrule
+identity, shuffled order, 1-based ids & 100 & 100 & 100 & 100 & 100 & 100 \\
+translate 2 mm & 100 & 75.7 & 75.7 & 81.3 & 85.7 & 0 \\
+rotate about $Z$ by $10^\circ$ & 100 & 48.6 & 48.6 & 79.7 & 76.1 & 0 \\
+jitter $\sigma=0.5$ mm & 100 & 89.2 & 89.2 & 58.3 & 82.5 & 0 \\
+jitter $\sigma=2$ mm & 100 & 60.6 & 60.6 & 45.9 & 68.8 & 0 \\
+delete 25\% & 75.0 & 75.0 & 75.0 & 64.4 & 71.5 & 0 \\
+duplicate 50\% & 66.8 & 100 & 100 & 100 & 88.9 & 0 \\
+beam $\rightarrow$ axis-aligned box & 100 & 80.4 & 83.7 & 73.5 & 84.7 & 44.0 \\
+mirror $Y$ (handedness) & 100 & 71.2 & 71.2 & 91.0 & 87.4 & 60.0 \\
+random positions, types kept & 100 & 9.0 & 9.0 & 26.2 & 45.1 & 0 \\
+count only (random unit boxes) & 100 & 6.3 & 6.6 & 3.4 & 36.6 & 0 \\ \midrule
+split every box in two (same volume) & 93.9 & 94.6 & 94.6 & 95.4 & 94.6 & 68.0 \\
+split every beam in two (same volume) & 80.7 & 80.2 & 80.2 & 90.6 & 83.8 & 44.0 \\
+scale $\times1.10$ & 100 & 55.9 & 55.9 & 66.8 & 74.3 & 0 \\
+scale $\times1.25$ & 100 & 20.5 & 20.5 & 60.7 & 60.4 & 0 \\
+scale $\times1.50$ & 100 & 8.9 & 8.9 & 60.2 & 56.4 & 0 \\
+\bottomrule
+\end{tabular}
+\caption{Means over the 75 main cases (\file{v2/experiments/e02_perturbation_validity.py}). The last five rows are new in this release (Reviewer 3).}
+\end{table}
+
+\noindent What the table shows:
+\begin{itemize}
+\item \textbf{Relational checks are robust to rigid moves.} Only anchor constraints fail under translation; mates and patterns hold.
+\item \textbf{The constraint layer catches sub-millimetre error.} At $\sigma=0.5$\,mm, Geometry barely moves (89.2) while the Semantic pass rate halves (58.3).
+\item \textbf{Global has a floor.} Count-only output keeps Global at 36.6 through Coverage, which is why the paper reports components and Exact.
+\item \textbf{Decomposition has a measured cost.} Splitting every box costs 5.4 Global points; splitting every beam costs 16.2. The v2 prompts prescribe each part and its id, so a split is a deviation from the specification.
+\item \textbf{Rescaling contradicts the rebuttal.} The rebuttal (under v1) reported that Semantic stays near 99 for rescaled answers. Under v2 it falls to about 60, because every v2 prompt states its dimensions, so a rescaled answer really is wrong. Only relational kinds hold (orientation 88\%, topology 100\% at $\times1.5$). The rebuttal's sentence must not be reused.
+\end{itemize}
+
+\subsection{Sensitivity, convergent validity and cross-implementation}
+\begin{itemize}
+\item \textbf{E04, 20 scorer variants.} They vary:
+  \begin{itemize}
+  \item the pair form and the coverage form;
+  \item the position tolerance and the orientation saturation;
+  \item the constraint tolerances ($\times0.5$ to $\times5$);
+  \item six weightings, including Geometry-only and Semantic-only;
+  \item all v1-like choices at once;
+  \item three groupings of constraints into Semantic.
+  \end{itemize}
+  The top-three set is the same in all 20. The lowest agreement with the default ranking is Spearman $\rho=0.940$ (Kendall $\tau\geq0.795$).
+\item \textbf{E05, against standard shape metrics} (897 released outputs).
+  \begin{itemize}
+  \item Case level: Geometry agrees with IoU at $\rho=0.807$, with F-score at 2\% at 0.816, and with Chamfer at 0.753. Semantic agrees with IoU at 0.823. Coverage agrees with IoU at only 0.484: volume metrics are nearly blind to the part count.
+  \item Model level (against Global): IoU 0.896, F@2\% 0.951, Chamfer 0.918.
+  \item Disagreement quadrants: 31.7\% (284/897) have F@2\%$\,\geq0.9$ yet are not exact; 6.0\% have IoU$\,\geq0.8$ with Sem$\,<60$; 2.3\% have IoU$\,<0.3$ with Geom$\,\geq80$.
+  \item Caveat: the released v1 records were stored after v1's parsing. The live runs re-establish these cases on v2 outputs (a05).
+  \end{itemize}
+\item \textbf{E07, an independently written matcher} (June 2026).
+  \begin{itemize}
+  \item Like for like, it reproduces the model Geometry ranking exactly (Spearman 1.000). At case level the agreement is $\rho=0.988$, with 89.9\% of cases within 2 points.
+  \item The comparison also exposed two v2 normalizer gaps (beams without a section; Euler angles under \texttt{orientation}). Both are fixed and tested.
+  \end{itemize}
+\item \textbf{E08, CAD-kernel round trip} (\file{v2/experiments/e08_kernel_roundtrip.py}).
+  \begin{itemize}
+  \item All 5{,}042 reference primitives build as valid OpenCascade solids, and all 5{,}042 are recovered from their B-Rep faces (2{,}502 of them as label-free prisms).
+  \item Through the complete cadquery-arm path (program $\rightarrow$ sandbox $\rightarrow$ kernel $\rightarrow$ recovery $\rightarrow$ evaluator), 75/75 cases are exact. The lowest Geometry is 99.999998, which is rounding.
+  \end{itemize}
+\end{itemize}
+
+% ---------------------------------------------------------------------------------------------------------
+\section{Experimental design for the live runs}
+\subsection{Arms}
+\begin{table}[h]\small
+\begin{tabularx}{\linewidth}{@{}lLL@{}}
+\toprule
+arm & the model receives & isolates \\ \midrule
+json & v2 prompt + output contract & baseline: writes every coordinate \\
+neutral & same, object and domain nouns replaced; numbers unchanged (tested) & recall of known objects \\
+tool & same, writes a Python program that prints the JSON (sandboxed) & arithmetic \\
+v1 & the released v1 prompt (leaked totals, formulas) + contract & copying: scaffolding sensitivity \\
+mates & prompt + CML (parts, mates, patterns); a deterministic solver places parts & pose and pattern derivation \\
+schema & json with provider-native constrained decoding; enforcement recorded & the output-format channel \\
+cadquery & prompt; writes CadQuery, executed in OpenCascade, primitives recovered & code vs.\ coordinates; ``builds but wrong'' \\
+probe & prompt; returns only three named parts (middle id, last id, one seeded id) & cost of producing the whole assembly \\
+repair\_generic & multi-turn: ``check and fix'', all $R$ rounds & self-refinement without information \\
+repair\_verifier & multi-turn: the reference-free verifier's report; stops only when the report is clean & constraint feedback as a way forward \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Hypotheses fixed before the runs}
+Effects are arm minus json on the expected single-attempt exact rate:
+\begin{itemize}
+\item per case, averaged over cases;
+\item with 95\% CIs from a family-cluster bootstrap and family-level sign-flip $p$-values (Holm-corrected);
+\item pooled over models with the same family draw.
+\end{itemize}
+Verdicts are three-valued: \emph{supported}, \emph{contradicted} or \emph{inconclusive}. For the equivalence hypotheses the margin is $\pm5$ percentage points.
+\begin{table}[h]\small
+\begin{tabularx}{\linewidth}{@{}lLL@{}}
+\toprule
+& contrast & reading if supported \\ \midrule
+H1 & tool $>$ json and mates $>$ json & computing and writing numbers is a bottleneck \\
+H2 & mates $>$ tool (16 gated vs.\ 9 ungated families) & a relational interface helps beyond arithmetic \\
+H3 & neutral $\approx$ json & recall of named objects does not drive scores \\
+H4 & v1 $>$ json, per family & how much the released prompts helped \\
+H5 & schema $\approx$ json & the output format is not the bottleneck \\
+H6 & cadquery vs.\ json; rate of ``builds but wrong'' & build success does not imply spatial correctness \\
+H7 & probe $>$ the same parts in full answers & serialisation / length cost \\
+H8 & repair\_verifier $>$ repair\_generic at round $R$ (plus oracle single-channel bounds) & constraint feedback repairs answers \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noindent Also pre-registered:
+\begin{itemize}
+\item model \emph{tiers} (Holm-corrected pairwise tests), not ranks, and the variance decomposition (model, family, interaction);
+\item \emph{breaking size} on the sweep: a logistic fit in $\log_2$(parts) with penalised family offsets, where infeasible and truncated responses are censored, and no extrapolation is made beyond the observed sizes;
+\item the \emph{held-out minus main} gap, with a memorization index: the share of held-out answers closer to the default answer;
+\item \emph{validity on live outputs}: the metrics of E05, the kernel build rate of json answers, a failure taxonomy, and a list of never-solved cases for the prompt-sufficiency review.
+\end{itemize}
+
+\subsection{Model registry and cost}
+\begin{itemize}
+\item \textbf{Where profiles live.} \file{v2/config/models.json} fixes, per profile: the model id, the documented output cap, the reasoning settings, whether the API accepts a temperature, schema support, the price, and the source of each value (checked on 28 September 2026).
+\item \textbf{Temperature.} It is 1.0 wherever accepted. Current Claude models reject sampling parameters, so the runner omits the field for them and records that it was not sent.
+\item \textbf{Cost.} The estimates below come from dry runs. Hidden reasoning is assumed at a rough per-request figure, so treat them as $\pm2\times$. The real spend is metered from the providers' usage fields.
+\end{itemize}
+
+\begin{table}[h]\small\centering
+\begin{tabular}{@{}llrrrl@{}}
+\toprule
+profile & id & output cap & \$/M in, out & est.\ total & status \\ \midrule
+claude-opus-5 & anthropic:claude-opus-5 & 128K & 5 / 25 & \$903 & verified \\
+claude-sonnet-5 & anthropic:claude-sonnet-5 & 128K & 2 / 10 & \$361 & verified \\
+gpt-6-sol & openai:gpt-6-sol & 128K & 2 / 10 & \$361 & verified \\
+gemini-3.1-pro & google:gemini-3.1-pro-preview & 65{,}536 & 2 / 12 & \$431 & verified \\
+gemini-3.8-flash & google:gemini-3.8-flash & 65{,}536 & 0.75 / 3.75 & \$114 & verified \\
+deepseek-v4-pro & deepseek:deepseek-v4-pro & 32K & 1.32 / 3.96 & \$100 & \textbf{to confirm} \\
+kimi-k2.6 & moonshot:kimi-k2.6 & 32K & 0.95 / 4 & \$76 & \textbf{to confirm} \\
+gpt-oss-120b & openrouter:openai/gpt-oss-120b & 32K & 0.1 / 0.5 & \$12 & \textbf{to confirm} \\
+qwen3.8-27b & openrouter:qwen/qwen3.8-27b & 32K & 0.2 / 0.8 & \$20 & \textbf{to confirm} \\ \midrule
+gpt-5.4 (v1 continuity) & openai:gpt-5.4 & 128K & 2.5 / 15 & \$73 & verified \\
+claude-opus-4-6 (v1 continuity) & anthropic:claude-opus-4-6 & 128K & 5 / 25 & \$87 & verified \\
+\bottomrule
+\end{tabular}
+\caption{Totals cover the main split (10 arms, $k=3$), the sweep (json/tool/mates, $k=1$) and the held-out split (json/tool/mates, $k=3$). Continuity profiles run json, tool, schema and v1 on the main split only. About \$2.4k for the nine core and open profiles, plus about \$160 for continuity.}
+\end{table}
+
+% ---------------------------------------------------------------------------------------------------------
+\section{Run infrastructure}
+\begin{itemize}
+\item \textbf{Providers.}
+  \begin{itemize}
+  \item Supported: OpenAI, Anthropic (official SDK), Google, DeepSeek, Moonshot, OpenRouter and Together.
+  \item Every request is streamed.
+  \item Transient errors (408/409/425/429/5xx/529, timeouts) are retried with exponential backoff that honours \texttt{retry-after}; other client errors are not retried.
+  \end{itemize}
+\item \textbf{Records.} Every request is appended to \file{runs/<run>/responses.jsonl} before scoring. It records:
+  \begin{itemize}
+  \item the settings actually sent, including whether the temperature was sent;
+  \item the returned model version, finish reason, usage and cost;
+  \item latency, attempts, schema enforcement and the repair feedback text;
+  \item the raw answer.
+  \end{itemize}
+  Scores go to \file{scores.jsonl}. The manifest holds the git commit, the code and case-file hashes, the registry entries and the argv.
+\item \textbf{Resume and budget.}
+  \begin{itemize}
+  \item A completed or infeasible request is never bought twice; API errors are retried on the next invocation.
+  \item \texttt{--max-usd} caps the listed profiles' recorded spend.
+  \item \emph{Infeasible} means that the answer alone cannot fit the model's output cap. Such cases are excluded, never counted as failures.
+  \end{itemize}
+\item \textbf{Safety of the records.} A scoring crash is recorded as a harness error and loses nothing. Appends are file-locked, so several processes can write to one run directory. \texttt{python -m c2cad.runner.rescore} re-scores every recorded answer offline.
+\item \textbf{Smoke gate.} \texttt{--smoke} runs the smallest and largest feasible case per arm. It checks the finish reason, usage, returned model, parsing and truncation, and must print \texttt{SMOKE PASSED} before a full run.
+\item \textbf{Sandboxes.} Model programs run in a separate interpreter under:
+  \begin{itemize}
+  \item an AST allow-list;
+  \item an empty temporary directory;
+  \item \texttt{RLIMIT\_FSIZE}$\,=0$;
+  \item CPU and wall-clock limits.
+  \end{itemize}
+  CadQuery programs run in the CAD environment (\file{v2/.venv-cad}, CadQuery 2.8) with file export banned.
+\end{itemize}
+
+% ---------------------------------------------------------------------------------------------------------
+\section{Analysis pipeline}
+One command, \texttt{cd v2 \&\& python -m analysis.make\_all}, reads every real run directory and writes the following to \file{v2/reports/results/analysis/}:
+\begin{itemize}
+\item \textbf{a01}: outcomes per model $\times$ arm (first attempt, mean over $k$, pass@$k$, all axes with cluster CIs); response statuses; cost and returned versions; tiers; variance decomposition.
+\item \textbf{a02}: attribution contrasts and verdicts H1--H7; per family and per constraint kind; mates gated vs.\ ungated with the invalid-program rate; cadquery runs, builds and ``builds but wrong''; probe vs.\ full answer.
+\item \textbf{a03}: breaking size (censored) with largest scale solved per family; held-out gap; memorization index.
+\item \textbf{a04}: repair trajectories by round, the H8 verdict, and oracle single-channel repair bounds (types, positions, missing parts) on the same seeds.
+\item \textbf{a05}: validity on live outputs (IoU, Chamfer, F-score, axis and OBB orientation); disagreement quadrants with examples; per-case metrics CSV; kernel build of json answers; failure taxonomy; co-located type confusions; the prompt-sufficiency review list.
+\item \textbf{a06} and figures: annotated failure renders (parts coloured as correct, misplaced, substituted, extra or missing), the attribution forest plot, the family $\times$ arm heat map, scale curves and repair curves.
+\item \file{paper_numbers.tex}: every quoted number as a \LaTeX{} macro, so the paper text cannot drift from the data.
+\end{itemize}
+The pipeline was exercised end to end on about 8{,}300 records from three mock models over every arm and split. These are tests of the machinery, not results.
+
+% ---------------------------------------------------------------------------------------------------------
+\section{Rebuttal commitments}
+\begin{longtable}{@{}p{0.55\linewidth}p{0.12\linewidth}p{0.27\linewidth}@{}}
+\toprule
+commitment & status & where \\ \midrule \endhead
+rewrite the scaffolded prompts; audit as a strict CI gate & \stDone & E00; test gate \\
+generator-side code-vs-JSON experiment (model writes CadQuery) & \stRuns & cadquery arm, E08, a02 \\
+release the JSON$\rightarrow$CadQuery converter & \stDone & \file{cadkernel.py}, E08 \\
+constrained-decoding condition & \stRuns & schema arm (H5) \\
+non-LLM controls (oracle, beam$\rightarrow$box, random positions, count only) & \stDone & E02 \\
+couple the semantic checks to geometry & \stDone & assignment binding; E02 \\
+sensitivity to weights, exponents and gates & \stDone & E04 \\
+serialisation load & \stRuns & probe arm (H7); breaking size (a03) \\
+held-out split & \stDone / \stRuns & 48 cases; a03 \\
+one documented scoring function, regression tests & \stDone & Global\_v2; tests \\
+tiers, not ranks & \stRuns & a01 \\
+visual atlas; three levels side by side & \stDone & E06 atlas \\
+metric interpretation key & \stDone & E02 table \\
+annotated failure figure & \stRuns & a06 \\
+iterative refinement & \stRuns & repair arms; a04 \\
+decomposition sensitivity & \stDone & E02 \\
+merge pass for decompositions & \stOpen & not implemented (prompts prescribe parts) \\
+IoU/Chamfer/F-score comparison; per-case IoU & \stDone / \stRuns & E05; a05 CSV \\
+orientation over oriented bounding boxes & \stDone & \texttt{orientation\_error\_obb} \\
+rescaled references & \stDone & E02 (result differs from rebuttal) \\
+correct the Axle Bearing levels (5 parts at every level) & \stOpen & author decision \\
+human agreement study; independent sufficiency check & \stOpen & needs people \\
+\bottomrule
+\end{longtable}
+
+% ---------------------------------------------------------------------------------------------------------
+\section{How to run}
+\begin{small}
+\begin{verbatim}
+cp v2/.env.example v2/.env          # fill in only the providers you will run
+cd v2
+python -m c2cad.runner.run --profile gpt-6-sol --arms json,neutral,tool,v1,mates,schema,\
+    cadquery,probe,repair_generic,repair_verifier --smoke --run smoke_gpt-6-sol
+python -m c2cad.runner.run --profile gpt-6-sol --arms json,neutral,tool,v1,mates,schema,\
+    cadquery,probe --k 3 --run main --workers 6 --max-usd 400
+python -m c2cad.runner.run --profile gpt-6-sol --arms repair_generic,repair_verifier \
+    --run main --workers 6 --max-usd 450
+python -m c2cad.runner.run --profile gpt-6-sol --split sweep --arms json,tool,mates --k 1 \
+    --run sweep --max-usd 100
+python -m c2cad.runner.run --profile gpt-6-sol --split heldout --arms json,tool,mates --k 3 \
+    --run heldout --max-usd 100
+python -m analysis.make_all
+\end{verbatim}
+\end{small}
+The full procedure, the fixes for common smoke-test failures and the cost table are in \file{v2/RUNBOOK.md}.
+
+% ---------------------------------------------------------------------------------------------------------
+\section{Open decisions and limitations}
+\begin{itemize}
+\item \textbf{Before the first paid request}, because these change what models receive:
+  \begin{itemize}
+  \item sign-off on the two prompt patches and on the output contract;
+  \item the model roster and the reasoning setting per profile;
+  \item the budget;
+  \item confirmation of the four unverified registry entries.
+  \end{itemize}
+\item \textbf{Axle Bearing} has 5 parts at every level. Describe its levels as parameter variants, or redesign the family.
+\item \textbf{Decomposition merge pass} (promised to Reviewer 3): not implemented; E02 measures the cost of splitting instead.
+\item \textbf{Not yet done:}
+  \begin{itemize}
+  \item CML gate programs for the remaining 9 families (the expressibility map currently covers 16/25);
+  \item the human rating study;
+  \item an independent audit of the trace map;
+  \item a hand review of the high-overlap prompts;
+  \item OpenSCAD, which is not installed and has no arm.
+  \end{itemize}
+\item \textbf{Scope.} Primitive assemblies only: no B-Rep editing and no feature trees. API models drift, so the returned versions and dates are recorded per request.
+\end{itemize}
+
+\end{document}

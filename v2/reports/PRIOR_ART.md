@@ -33,7 +33,7 @@
    - direct coordinates.
 
    Each condition changes one factor. Per their abstracts, none of the works above isolate these factors; confirm this from the full texts.
-2. **Reference-free, clause-traced semantic validity.** 24,579 machine-checked constraints, each mapped to a prompt sentence. References satisfy 100% of them at the main, sweep and held-out scales. This contrasts with MLLM-judge QA (P3D-Bench) and VLM judges (AssemCAD, Text2CAD-Bench).
+2. **Reference-free, clause-traced semantic validity.** 25,371 machine-checked constraints (E09), each mapped to a prompt sentence. References satisfy 100% of them at the main, sweep and held-out scales. This contrasts with MLLM-judge QA (P3D-Bench) and VLM judges (AssemCAD, Text2CAD-Bench).
 3. **Metric validity evidence.** Reference self-consistency, invariance tests, responses to corruption, sensitivity across 20 scorer variants, and convergent and discriminant validity against Chamfer, IoU and F-score. This includes documented cases where volume metrics hide missing parts. Among the works above, only AssemCAD argues against Chamfer; none validate their metric this way.
 4. **Generalization and scale.** A held-out split (new values, mirrored handedness, rotated anchors; the memorized default answer is rejected) and a 121-case scale sweep for per-model breaking size.
 5. **Where CAD-style interfaces stop helping.** A gated expressibility study: 16/25 families are exactly expressible with generic mates and patterns from prompt numbers alone or with simple counts and fractions. Growth laws (Fermat spiral, taper, geodesic refinement, accumulated tilt) are not.

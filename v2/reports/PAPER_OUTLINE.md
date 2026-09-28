@@ -42,7 +42,7 @@ Read the full texts of P3D-Bench, AssemCAD, AIDL and ExpConCAD before citing the
 - **Figure:** the atlas contact sheets, and the three levels of one family with their prompts. ✅
 
 ## 4. Measurement and its validity
-- **Scorer:** Coverage, Geometry (optimal assignment with a pose gate) and Semantic (24,579 clause-traced constraints). ✅
+- **Scorer:** Coverage, Geometry (optimal assignment with a pose gate) and Semantic (25,371 clause-traced constraints (E09)). ✅
 - **Validity evidence:**
   - references score 100 against themselves, under permutation and under renumbering (tests) ✅;
   - the CAD-kernel round trip: 5,042/5,042 primitives build and are recovered, and the cadquery path is exact on 75/75 (E08) ✅;
@@ -84,7 +84,7 @@ Read the full texts of P3D-Bench, AssemCAD, AIDL and ExpConCAD before citing the
 ## 7. Where CAD-style interfaces stop helping, and what does help
 - **Expressibility map.** ✅
   - 16/25 families are exact with generic mates and patterns. Of these, 9 need only prompt numbers, 6 also need counts or fractions, and 1 needs a domain convention.
-  - The remaining families need growth laws. Programs for 8 of these families are still to write.
+  - The remaining families need growth laws. Programs for the 9 remaining families are still to write (E09 lists the 16 gated ones).
 - **Combined with section 5**, this tells designers of CAD copilots four things (⏳):
   - where mates suffice;
   - where code or tools are needed;
