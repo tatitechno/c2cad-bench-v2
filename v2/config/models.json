@@ -1,0 +1,114 @@
+{
+ "checked_on": "2026-09-28",
+ "how_to_use": "python -m c2cad.runner.run --profile <name> ... ; each entry fixes the model id, the documented output cap, the reasoning settings and the price used by the cost guard. Entries with verified=false must be confirmed on the provider's page (id, output cap, price) and pass the smoke test before a full run. Two profiles may share a model id with different settings (e.g. reasoning on/off); analysis groups by profile name.",
+ "field_notes": {
+  "output_cap": "documented maximum output tokens (hidden reasoning included for reasoning models)",
+  "reasoning_headroom": "output tokens reserved for hidden reasoning on top of the visible answer; cut back (never below the answer) when the cap is reached",
+  "send_temperature": "false for APIs that reject sampling parameters; the run then records that temperature 1.0 was requested but not sent",
+  "schema_mode": "json_schema (native constrained decoding) | json_object (JSON mode only; the schema arm is then recorded as json_mode) | none (schema arm skipped)",
+  "est_reasoning_tokens": "rough hidden-reasoning tokens per request, for the pre-run cost estimate only",
+  "tier": "core = every arm and split; continuity = the v1 model, main split json/tool/schema/v1 for the v1->v2 comparison; open = open-weight models; optional = add if budget allows"
+ },
+ "models": {
+  "claude-opus-5": {
+   "spec": "anthropic:claude-opus-5", "tier": "core", "output_cap": 128000, "reasoning_headroom": 24000,
+   "thinking": null, "reasoning_effort": "high", "send_temperature": false, "schema_mode": "json_schema", "stream": true,
+   "price_in": 5.0, "price_out": 25.0, "est_reasoning_tokens": 8000, "verified": true,
+   "source": "claude-api reference (models table cached 2026-06-24): 128K output, $5/$25, adaptive thinking on by default, sampling parameters return 400, output_config.format for JSON schema",
+   "notes": "thinking omitted = adaptive (on by default); effort set explicitly."
+  },
+  "claude-sonnet-5": {
+   "spec": "anthropic:claude-sonnet-5", "tier": "core", "output_cap": 128000, "reasoning_headroom": 24000,
+   "thinking": "adaptive", "reasoning_effort": "high", "send_temperature": false, "schema_mode": "json_schema", "stream": true,
+   "price_in": 2.0, "price_out": 10.0, "est_reasoning_tokens": 8000, "verified": true,
+   "source": "claude-api reference: 128K output, $2/$10, non-default sampling parameters rejected, structured outputs supported"
+  },
+  "claude-opus-5-5": {
+   "spec": "anthropic:claude-opus-5-5", "tier": "optional", "output_cap": 128000, "reasoning_headroom": 24000,
+   "thinking": null, "reasoning_effort": "high", "send_temperature": false, "schema_mode": "json_schema", "stream": true,
+   "price_in": 4.0, "price_out": 20.0, "est_reasoning_tokens": 8000, "verified": true,
+   "source": "claude-api reference: launching; thinking cannot be disabled, effort default medium (set to high here), $4/$20",
+   "notes": "structured outputs listed for Opus 5 (same feature set); confirm with the smoke test."
+  },
+  "claude-fable-5-1": {
+   "spec": "anthropic:claude-fable-5-1", "tier": "optional", "output_cap": 128000, "reasoning_headroom": 24000,
+   "thinking": null, "reasoning_effort": "high", "send_temperature": false, "schema_mode": "json_schema", "stream": true,
+   "price_in": 10.0, "price_out": 50.0, "est_reasoning_tokens": 10000, "verified": true,
+   "source": "claude-api reference: most capable Claude; thinking always on; sampling params 400; $10/$50"
+  },
+  "claude-opus-4-6": {
+   "spec": "anthropic:claude-opus-4-6", "tier": "continuity", "output_cap": 128000, "reasoning_headroom": 0,
+   "thinking": null, "reasoning_effort": null, "send_temperature": true, "schema_mode": "none", "stream": true,
+   "price_in": 5.0, "price_out": 25.0, "est_reasoning_tokens": 0, "verified": true,
+   "source": "claude-api reference: v1 model; accepts sampling parameters; thinking off when omitted",
+   "notes": "structured outputs are not listed for Opus 4.6, so the schema arm is skipped."
+  },
+  "gpt-6-sol": {
+   "spec": "openai:gpt-6-sol", "tier": "core", "output_cap": 128000, "reasoning_headroom": 24000,
+   "reasoning_effort": "high", "send_temperature": true, "schema_mode": "json_schema", "stream": true,
+   "price_in": 2.0, "price_out": 10.0, "est_reasoning_tokens": 8000, "verified": true,
+   "source": "developers.openai.com/api/docs/models/gpt-6-sol (2026-09-28): 128K output, 1.05M context, $2/$10, effort none..max (default medium), chat completions + structured outputs",
+   "notes": "temperature 1.0 is the default; if the smoke test returns a 400 for temperature, set send_temperature=false."
+  },
+  "gpt-6-astra": {
+   "spec": "openai:gpt-6-astra", "tier": "optional", "output_cap": 128000, "reasoning_headroom": 24000,
+   "reasoning_effort": "high", "send_temperature": true, "schema_mode": "json_schema", "stream": true,
+   "price_in": 10.0, "price_out": 50.0, "est_reasoning_tokens": 10000, "verified": true,
+   "source": "developers.openai.com/api/docs/models (2026-09-28): 128K output, $10/$50"
+  },
+  "gpt-5.4": {
+   "spec": "openai:gpt-5.4", "tier": "continuity", "output_cap": 128000, "reasoning_headroom": 0,
+   "reasoning_effort": null, "send_temperature": true, "schema_mode": "json_schema", "stream": true,
+   "price_in": 2.5, "price_out": 15.0, "est_reasoning_tokens": 0, "verified": true,
+   "source": "developers.openai.com/api/docs/models/gpt-5.4 (2026-09-28): 128K output, $2.5/$15, effort default none",
+   "notes": "v1 model, run at its default (no reasoning) for the v1->v2 comparison."
+  },
+  "gemini-3.1-pro": {
+   "spec": "google:gemini-3.1-pro-preview", "tier": "core", "output_cap": 65536, "reasoning_headroom": 16000,
+   "send_temperature": true, "schema_mode": "json_schema", "stream": true,
+   "extra_body": {"generationConfig": {"thinkingConfig": {"thinkingLevel": "high"}}},
+   "price_in": 2.0, "price_out": 12.0, "est_reasoning_tokens": 8000, "verified": true,
+   "source": "ai.google.dev model + pricing pages (2026-09-28): 65,536 output, $2/$12 (<=200k prompt), thinking levels; Google recommends temperature 1.0",
+   "notes": "v1 model too. Schema sent as generationConfig.responseJsonSchema; if the smoke test rejects it, set google_schema_field to responseSchema."
+  },
+  "gemini-3.8-flash": {
+   "spec": "google:gemini-3.8-flash", "tier": "core", "output_cap": 65536, "reasoning_headroom": 16000,
+   "send_temperature": true, "schema_mode": "json_schema", "stream": true,
+   "extra_body": {"generationConfig": {"thinkingConfig": {"thinkingLevel": "high"}}},
+   "price_in": 0.75, "price_out": 3.75, "est_reasoning_tokens": 6000, "verified": true,
+   "source": "ai.google.dev (2026-09-28): stable, 65,536 output, thinking low/medium/high (minimal errors), $0.75/$3.75 through 2026-12-31"
+  },
+  "deepseek-v4-pro": {
+   "spec": "deepseek:deepseek-v4-pro", "tier": "open", "output_cap": 32768, "reasoning_headroom": 0,
+   "send_temperature": true, "schema_mode": "json_object", "stream": true,
+   "price_in": 1.32, "price_out": 3.96, "est_reasoning_tokens": 4000, "verified": false,
+   "source": "third-party pricing pages (2026-09-28; api-docs.deepseek.com refused the connection): deepseek-chat / deepseek-reasoner aliases retired 2026-07-24; deepseek-v4-pro and deepseek-flash current; thinking is a per-call setting",
+   "notes": "CONFIRM the id, the output cap and how thinking mode is enabled on api-docs.deepseek.com; add the thinking parameter to extra_body. JSON mode only (no schema enforcement)."
+  },
+  "kimi-k2.6": {
+   "spec": "moonshot:kimi-k2.6", "tier": "open", "output_cap": 32768, "reasoning_headroom": 0,
+   "send_temperature": true, "schema_mode": "json_object", "stream": true,
+   "price_in": 0.95, "price_out": 4.0, "est_reasoning_tokens": 2000, "verified": false,
+   "source": "platform.kimi.ai pricing (2026-09-28): kimi-k2.6, 262,144 context, $0.95/$4.00; kimi-k3 $3/$15",
+   "notes": "CONFIRM the output cap, the base URL (platform moved to platform.kimi.ai; api.moonshot.ai used here) and json_schema support. Open-weight K2 series; successor of v1's kimi-k2.5."
+  },
+  "gpt-oss-120b": {
+   "spec": "openrouter:openai/gpt-oss-120b", "tier": "open", "output_cap": 32768, "reasoning_headroom": 8000,
+   "reasoning_effort": "high", "send_temperature": true, "schema_mode": "json_schema", "stream": true,
+   "price_in": 0.1, "price_out": 0.5, "est_reasoning_tokens": 4000, "verified": false,
+   "source": "openrouter.ai/openai/gpt-oss-120b (2026-09-28): accepts response_format and reasoning",
+   "notes": "CONFIRM price and output cap on the OpenRouter page. The runner adds provider.require_parameters for the schema arm."
+  },
+  "qwen3.8-27b": {
+   "spec": "openrouter:qwen/qwen3.8-27b", "tier": "open", "output_cap": 32768, "reasoning_headroom": 8000,
+   "send_temperature": true, "schema_mode": "json_schema", "stream": true,
+   "price_in": 0.2, "price_out": 0.8, "est_reasoning_tokens": 4000, "verified": false,
+   "source": "OpenRouter listing (2026-09-28): Qwen3.8 27B, open weights (Apache-2.0), released 2026-08-14",
+   "notes": "CONFIRM the id (paid variant, not :free), price and output cap. Consider also the open-weight Qwen3.8 2.4T-A95B if listed."
+  },
+  "mock-reference": {"spec": "mock:reference", "tier": "test", "output_cap": 1000000, "price_in": 0, "price_out": 0, "verified": true, "source": "offline"},
+  "mock-noisy": {"spec": "mock:noisy", "tier": "test", "output_cap": 1000000, "price_in": 1.0, "price_out": 4.0, "verified": true, "source": "offline"},
+  "mock-noisy-b": {"spec": "mock:noisy-b", "tier": "test", "output_cap": 1000000, "price_in": 1.0, "price_out": 4.0, "verified": true, "source": "offline", "notes": "a second noisy mock model with a different skill offset"},
+  "mock-smallcap": {"spec": "mock:noisy", "tier": "test", "output_cap": 20000, "reasoning_headroom": 4000, "price_in": 1.0, "price_out": 4.0, "verified": true, "source": "offline", "notes": "exercises infeasible cases and the headroom cut-back"}
+ }
+}

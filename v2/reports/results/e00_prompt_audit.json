@@ -1,0 +1,166 @@
+{
+ "v1": {
+  "n": 75,
+  "any_flag": 60,
+  "explicit_shape_count": 48,
+  "coordinate_vector": 27,
+  "formula_or_assignment": 9,
+  "trig_or_cartesian_hint": 18
+ },
+ "v2_body": {
+  "n": 75,
+  "any_flag": 0,
+  "explicit_shape_count": 0,
+  "coordinate_vector": 0,
+  "formula_or_assignment": 0,
+  "trig_or_cartesian_hint": 0
+ },
+ "arms": {
+  "json": {
+   "n": 75,
+   "any_flag": 0,
+   "explicit_shape_count": 0,
+   "coordinate_vector": 0,
+   "formula_or_assignment": 0,
+   "trig_or_cartesian_hint": 0
+  },
+  "neutral": {
+   "n": 75,
+   "any_flag": 0,
+   "explicit_shape_count": 0,
+   "coordinate_vector": 0,
+   "formula_or_assignment": 0,
+   "trig_or_cartesian_hint": 0
+  },
+  "tool": {
+   "n": 75,
+   "any_flag": 0,
+   "explicit_shape_count": 0,
+   "coordinate_vector": 0,
+   "formula_or_assignment": 0,
+   "trig_or_cartesian_hint": 0
+  },
+  "mates": {
+   "n": 75,
+   "any_flag": 0,
+   "explicit_shape_count": 0,
+   "coordinate_vector": 0,
+   "formula_or_assignment": 0,
+   "trig_or_cartesian_hint": 0
+  },
+  "schema": {
+   "n": 75,
+   "any_flag": 0,
+   "explicit_shape_count": 0,
+   "coordinate_vector": 0,
+   "formula_or_assignment": 0,
+   "trig_or_cartesian_hint": 0
+  },
+  "cadquery": {
+   "n": 75,
+   "any_flag": 0,
+   "explicit_shape_count": 0,
+   "coordinate_vector": 0,
+   "formula_or_assignment": 0,
+   "trig_or_cartesian_hint": 0
+  },
+  "probe": {
+   "n": 75,
+   "any_flag": 0,
+   "explicit_shape_count": 0,
+   "coordinate_vector": 0,
+   "formula_or_assignment": 0,
+   "trig_or_cartesian_hint": 0
+  }
+ },
+ "shared": {
+  "output contract": {
+   "explicit_shape_count": false,
+   "coordinate_vector": true,
+   "formula_or_assignment": false,
+   "trig_or_cartesian_hint": false
+  },
+  "tool instruction": {
+   "explicit_shape_count": false,
+   "coordinate_vector": false,
+   "formula_or_assignment": false,
+   "trig_or_cartesian_hint": false
+  },
+  "cadquery instruction": {
+   "explicit_shape_count": false,
+   "coordinate_vector": true,
+   "formula_or_assignment": false,
+   "trig_or_cartesian_hint": false
+  },
+  "mates instruction + language reference + examples": {
+   "explicit_shape_count": false,
+   "coordinate_vector": true,
+   "formula_or_assignment": false,
+   "trig_or_cartesian_hint": false
+  }
+ },
+ "overlap": {
+  "v1": {
+   "occurrences": 22.71817032040472,
+   "distinct": 10.511832691249312,
+   "by_family": {
+    "Spiral Staircase": 4.821802935010482,
+    "Cannonball Pyramid": 27.22222222222222,
+    "Voxel Grid": 0.0,
+    "Domino Ring": 19.047619047619047,
+    "DNA Helix": 13.68421052631579,
+    "Flanged Pipe Joint": 23.4375,
+    "Suspension Bridge": 80.92105263157895,
+    "Planetary Array": 0.0,
+    "Cross-Braced Truss": 76.54320987654322,
+    "Fractal Y-Tree": 4.568527918781726,
+    "BCC Lattice": 16.272360069244087,
+    "Ball Bearing Assembly": 15.151515151515152,
+    "Furniture Assembly": 3.508771929824561,
+    "Pipe Manifold": 48.78048780487805,
+    "Axle Bearing": 0.0,
+    "Armillary Sphere": 0.0,
+    "Clock Tower Mechanism": 37.569060773480665,
+    "Gantry Crane Assembly": 71.42857142857143,
+    "Phyllotaxis Disc": 33.333333333333336,
+    "Compound Eye": 0.625,
+    "Diatom Frustule": 71.64750957854406,
+    "Honeycomb Lattice": 57.3474001507159,
+    "Vertebral Column": 12.363067292644757,
+    "Cochlear Spiral": 11.330049261083744,
+    "Radiolarian Skeleton": 1.8918918918918919
+   }
+  },
+  "v2": {
+   "occurrences": 13.227234401349072,
+   "distinct": 7.154650522839846,
+   "by_family": {
+    "Spiral Staircase": 3.1446540880503147,
+    "Cannonball Pyramid": 20.555555555555557,
+    "Voxel Grid": 0.0,
+    "Domino Ring": 16.666666666666668,
+    "DNA Helix": 12.631578947368421,
+    "Flanged Pipe Joint": 18.75,
+    "Suspension Bridge": 50.0,
+    "Planetary Array": 0.0,
+    "Cross-Braced Truss": 7.407407407407407,
+    "Fractal Y-Tree": 4.568527918781726,
+    "BCC Lattice": 16.272360069244087,
+    "Ball Bearing Assembly": 6.0606060606060606,
+    "Furniture Assembly": 3.508771929824561,
+    "Pipe Manifold": 51.21951219512195,
+    "Axle Bearing": 0.0,
+    "Armillary Sphere": 0.0,
+    "Clock Tower Mechanism": 23.204419889502763,
+    "Gantry Crane Assembly": 71.42857142857143,
+    "Phyllotaxis Disc": 33.333333333333336,
+    "Compound Eye": 0.625,
+    "Diatom Frustule": 0.5747126436781609,
+    "Honeycomb Lattice": 40.76865109269028,
+    "Vertebral Column": 12.363067292644757,
+    "Cochlear Spiral": 10.673234811165846,
+    "Radiolarian Skeleton": 1.8918918918918919
+   }
+  }
+ }
+}

@@ -200,6 +200,7 @@ class NormalizeReport:
     axis_from_euler_rotation: int = 0     # orientation given as Euler angles instead of an axis
     box_rotation_ignored: int = 0         # boxes are axis-aligned by schema; a rotation field is ignored
     beam_section_missing: int = 0         # beams without width/height: kept, section scored as wrong
+    prisms_resolved: int = 0              # label-free CAD prisms read as box/beam (cadquery arm; see prism.py)
 
 
 def normalize_shape(s: Any) -> tuple[Optional[Shape], str]:
