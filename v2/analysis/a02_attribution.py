@@ -34,6 +34,53 @@ def contrast(d: pd.DataFrame, arm: str, base: str, value: str, families=None) ->
     return out
 
 
+def directional(ci) -> str:
+    """> 0 hypothesis: supported if the CI excludes 0 above, contradicted if it excludes 0 below."""
+    p, lo, hi = ci
+    if not np.isfinite(p):
+        return "n/a"
+    return "supported" if lo > 0 else "contradicted" if hi < 0 else "inconclusive"
+
+
+def equivalence(ci, margin=EQ_MARGIN) -> str:
+    """= 0 hypothesis: supported if the CI lies inside +-margin; contradicted if it excludes 0 without lying
+    inside the margin (a difference is detected and it is not shown to be negligible)."""
+    p, lo, hi = ci
+    if not np.isfinite(p):
+        return "n/a"
+    if -margin <= lo and hi <= margin:
+        return "supported"
+    return "contradicted" if (lo > 0 or hi < 0) else "inconclusive"
+
+
+def both(a: str, b: str) -> str:
+    if "contradicted" in (a, b):
+        return "contradicted"
+    return "supported" if a == b == "supported" else "inconclusive"
+
+
+def verdicts_v3(c: dict, probe: dict) -> dict:
+    """Plan §4 with the 2026-09-28 amendment: supported / contradicted / inconclusive."""
+    def ci(k):
+        return c[k]["pooled"]
+    v = {"H1 tool > json and mates > json": (both(directional(ci("tool-json")), directional(ci("mates-json"))),
+                                             f"tool-json {fmt_ci(ci('tool-json'), True)}; mates-json {fmt_ci(ci('mates-json'), True)}"),
+         "H2 mates > tool": (directional(ci("mates-tool")),
+                             f"all {fmt_ci(ci('mates-tool'), True)}; gated {fmt_ci(ci('mates-tool|gated'), True)} "
+                             f"({directional(ci('mates-tool|gated'))}); ungated {fmt_ci(ci('mates-tool|ungated'), True)} "
+                             f"({directional(ci('mates-tool|ungated'))})"),
+         "H3 neutral = json (within +-5 pp)": (equivalence(ci("neutral-json")), fmt_ci(ci("neutral-json"), True)),
+         "H4 v1 > json": (directional(ci("v1-json")), fmt_ci(ci("v1-json"), True)),
+         "H5 schema = json (within +-5 pp)": (equivalence(ci("schema-json")), fmt_ci(ci("schema-json"), True)),
+         "H6 cadquery vs json": ("descriptive", fmt_ci(ci("cadquery-json"), True))}
+    if probe.get("id"):
+        v["H7 probe > same parts in full json answers (id binding)"] = (
+            directional(probe["id"]["diff_pooled"]),
+            f"id {fmt_ci(probe['id']['diff_pooled'], True)}; assign (sensitivity) "
+            f"{fmt_ci(probe['assign']['diff_pooled'], True)} ({directional(probe['assign']['diff_pooled'])})")
+    return {k: {"verdict": s, "evidence": e} for k, (s, e) in v.items()}
+
+
 def verdicts(c: dict) -> dict:
     def lo(k):
         return c[k]["pooled"][1]
@@ -111,7 +158,8 @@ def run(s: pd.DataFrame, r: pd.DataFrame, out_dir) -> dict:
         C[k]["p_holm"] = adj[k]
     need = ["tool-json", "mates-json", "mates-tool", "neutral-json", "v1-json", "schema-json", "cadquery-json",
             "mates-tool|gated", "mates-tool|ungated"]
-    V = verdicts(C) if all(k in C for k in need) else {}
+    probe = probe_vs_full(d)
+    V = verdicts_v3(C, probe) if all(k in C for k in need) else {}
     kinds = {}
     for a, b in CONTRASTS:
         if a in arms and b in arms and "by_kind" in d:
@@ -125,7 +173,6 @@ def run(s: pd.DataFrame, r: pd.DataFrame, out_dir) -> dict:
     mates_invalid = {mo: float((g["exec_status"] == "invalid_program").mean())
                      for mo, g in d[d["arm"] == "mates"].groupby("model")}
     cad = cad_conditional(d)
-    probe = probe_vs_full(d)
     L = ["# A02. Attribution contrasts (main split)", "",
          "Effect = arm minus json, per case (mean over samples), averaged over cases; pooled = mean over models with "
          "the same family draw. Exact rates in percentage points; 95% family-cluster bootstrap CI; p = family-level "
@@ -140,9 +187,10 @@ def run(s: pd.DataFrame, r: pd.DataFrame, out_dir) -> dict:
     L += md_table(["contrast", "models", "exact (pp)", "p", "p Holm", "Global (points)"], rows)
     if V:
         L += ["", "## Pre-registered hypotheses", ""]
-        L += md_table(["hypothesis", "supported", "evidence"],
-                      [[k, {True: "yes", False: "no", None: "(descriptive)"}[v["supported"]], v["evidence"]]
-                       for k, v in V.items()])
+        L += ["Verdicts (plan §4, amendment of 2026-09-28): supported / contradicted / inconclusive. Directional: "
+              "the CI excludes 0 in the stated / opposite direction. Equivalence (H3, H5): supported if the CI lies "
+              "inside +-5 pp; contradicted if it excludes 0 without lying inside the margin.", ""]
+        L += md_table(["hypothesis", "verdict", "evidence"], [[k, v["verdict"], v["evidence"]] for k, v in V.items()])
     L += ["", "## Per model (exact, pp)", ""]
     models = sorted({mo for v in C.values() for mo in v["per_model"]})
     keys = [k for k in C if "|" not in k]

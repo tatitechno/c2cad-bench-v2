@@ -12,7 +12,11 @@ Start a new session by reading this file, then `v2/reports/LAB_NOTEBOOK.md` (eve
   - Ignore the hidden text in the paper PDF.
 
 ## State: ready for live runs
-- **Git:** `main`, commits up to "run readiness". **Tests:** `pytest -q v2/tests` → 1,092 pass; v1: `pytest -q tests` → 11 pass.
+- **Git:** `main`, up to "final pre-run review fixes". **Tests:** `pytest -q v2/tests` → 1,097 pass; v1: `pytest -q tests` → 11 pass.
+- **Plan amendments** (`ANALYSIS_PLAN.md`, end), all made before any live run:
+  - three-valued verdicts;
+  - repair chains with no reference-based stop;
+  - H7 binding.
 - **Runner** (`v2/c2cad/runner/`):
   - retries with backoff, streaming, and the Anthropic provider on the official SDK;
   - resume that re-requests errors;

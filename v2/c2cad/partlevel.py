@@ -9,7 +9,9 @@ Per part:
   pair   the scorer's pose-gated pair score (0-100) against the reference part with that id
   exact  type equal, position within the length tolerance of the constraint layer (beams: both ends),
          every dimension within 1 %, axis within 0.5 degrees
-Binding: `id` = the output's own id; `assign` = the part the optimal assignment gives that role (full answers).
+Binding: `id` = the output's own id, with full answers numbered from 1 shifted as in evaluate.id_binding
+(the primary H7 comparison); `assign` = the part the optimal assignment gives that role (full answers only; the
+sensitivity analysis).
 """
 from __future__ import annotations
 
@@ -58,7 +60,10 @@ def part_exact(r: Shape, o: Shape, tl: float) -> bool:
     return True
 
 
-def by_id(out: list[Shape]) -> dict[int, Shape]:
+def by_id(out: list[Shape], one_based_shift: bool = True) -> dict[int, Shape]:
+    """Output parts by their own integer id. With one_based_shift, a full answer numbered from 1 (every id an
+    integer, the smallest 1, no 0) is shifted to 0-based, the same rule as evaluate.id_binding. The probe arm
+    names its ids explicitly, so its answers are bound without the shift."""
     d = {}
     for s in out:
         try:
@@ -68,15 +73,19 @@ def by_id(out: list[Shape]) -> dict[int, Shape]:
             d.setdefault(int(v), s)
         except (TypeError, ValueError):
             continue
+    if one_based_shift and d and len(d) == len(out) and min(d) == 1 and 0 not in d:
+        d = {k - 1: v for k, v in d.items()}
     return d
 
 
-def named_parts(ref: list[Shape], out: list[Shape], ids: list[int], amap: dict | None = None) -> dict:
-    """Metrics for the reference parts `ids` (reference index == prescribed id)."""
+def named_parts(ref: list[Shape], out: list[Shape], ids: list[int], amap: dict | None = None,
+                full_answer: bool = True) -> dict:
+    """Metrics for the reference parts `ids` (reference index == prescribed id). full_answer applies the 1-based
+    id shift (full answers); probe answers (ids named in the prompt) are bound without it."""
     D = assembly_diagonal(ref)
     tl = max(LEN_TOL_MIN, LEN_TOL_FRAC * D)
     res = {"ids": list(ids)}
-    bindings = {"id": by_id(out)}
+    bindings = {"id": by_id(out, one_based_shift=full_answer)}
     if amap is not None:
         bindings["assign"] = {r: out[j] for r, j in amap.items()}
     for name, bound in bindings.items():

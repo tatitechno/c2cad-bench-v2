@@ -44,7 +44,7 @@ Effects are arm − json, per model and pooled over models. The rule:
 
 The same is reported for Global_v2, per family, and per constraint kind.
 
-A verdict is "supported" when the 95% CI excludes 0 in the stated direction. "Equivalent" requires the CI to lie inside ±5 percentage points.
+A verdict is "supported" when the 95% CI excludes 0 in the stated direction. "Equivalent" requires the CI to lie inside ±5 percentage points. Verdicts are three-valued (supported / contradicted / inconclusive); see amendment (a) at the end.
 
 | # | Contrast | Reading if supported |
 |---|---|---|
@@ -55,7 +55,7 @@ A verdict is "supported" when the 95% CI excludes 0 in the stated direction. "Eq
 | H5 | schema − json equivalent to 0 (strict_schema responses only) | the output-format channel is not the bottleneck |
 | H6 | cadquery − json, plus the conditional rate: among cadquery programs that build every part as a recognised solid, the share that is not exact and the share with Geometry-equivalent < 70 | build success does not imply spatial correctness (measured on model-written code) |
 | H7 | probe part-exact − same parts in the full json answer > 0 | the cost of producing the whole assembly (length/serialisation) |
-| H8 | repair_verifier − repair_generic at the last round > 0 (chains seeded by the same non-exact json answers) | constraint-level feedback helps beyond a generic request to check. Also compared with oracle upper bounds: fix types only, positions only, add missing parts |
+| H8 | repair_verifier − repair_generic at the last round > 0 (chains seeded by the same non-exact json answers; generic runs all rounds, the verifier stops only when its own report is clean) | constraint-level feedback helps beyond a generic request to check. Also compared with oracle upper bounds: fix types only, positions only, add missing parts |
 
 **Mates-specific reporting.** The invalid-program rate, and gated families (hand-written CML programs reproduce the reference) versus ungated families.
 
@@ -96,3 +96,13 @@ For the profiles that match released v1 models (gpt-5.4, gemini-3.1-pro, claude-
 - No leaderboard.
 - No claim of "isolating spatial reasoning". Claims are restricted to the attribution contrasts above.
 - Primitive assemblies only.
+
+## Amendments (all made before any live run; the git history dates them)
+- **2026-09-28 (a) Verdicts are three-valued.**
+  - For a directional hypothesis: *supported* when the 95% CI excludes 0 in the stated direction, *contradicted* when it excludes 0 in the opposite direction, and *inconclusive* otherwise.
+  - For an equivalence hypothesis (H3, H5): *supported* when the CI lies inside ±5 pp, *contradicted* when it excludes 0 without lying inside the margin, and *inconclusive* otherwise. This replaces "supported / not supported", which could read an underpowered interval as evidence against a hypothesis.
+- **2026-09-28 (b) Repair chains use no reference information after seeding.**
+  - repair_generic always runs all R rounds, because a deployed "check and fix" loop cannot know when it is done.
+  - repair_verifier stops only when its own reference-free report is clean.
+  - H8 compares the two at round R. The round at which an answer first becomes exact is derived afterwards.
+- **2026-09-28 (c) H7 bindings.** The primary binding is the output's own ids, where a full answer numbered from 1 is shifted to 0-based by the same rule as `evaluate.id_binding` (probe answers name their ids and are not shifted). Assignment binding is the sensitivity analysis. H7 is added to the verdict table.

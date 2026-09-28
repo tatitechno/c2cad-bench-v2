@@ -170,7 +170,7 @@ def score_record(rec: dict, case: dict, post: dict) -> dict:
     ids = A.probe_ids(case)
     if arm == "probe":
         ref, out = shapes_for(case, value if value is not None else [])
-        m = partlevel.named_parts(ref, out, ids)
+        m = partlevel.named_parts(ref, out, ids, full_answer=False)
         s.update(n_ref=len(ref), n_out=len(out), probe=m, probe_pair=float(np.mean(m["pair_id"])),
                  probe_exact=float(np.mean(m["exact_id"])))
         return s
@@ -267,7 +267,12 @@ class Runner:
         return rec, post, sc
 
     def repair_chain(self, mc: ModelCfg, arm: str, case: dict, sample: int):
-        """Round 0 is the json answer for the same (model, case, sample); rounds 1..R add feedback."""
+        """Round 0 is the json answer for the same (model, case, sample); rounds 1..R add feedback.
+
+        Seeds are the json answers that are not exact (a selection fixed in the analysis plan). After that no
+        reference information decides anything: repair_generic always runs all R rounds (a deployed "check and
+        fix" loop cannot know when it is done), and repair_verifier stops only when its own reference-free
+        report is clean. A chain also stops when a response fails (api error, truncation, refusal)."""
         split = case.get("split", "main")
         j = self.latest.get((mc.name, "json", split, case["case_id"], sample, 0))
         if j is None or response_status(j) != "complete":
@@ -297,8 +302,6 @@ class Runner:
                 return f"stopped_{response_status(rec)}_at_{rnd}"
             history = history + [{"role": "assistant", "content": rec["text"]}]
             value, parsed = post["value"], post["value"] is not None
-            if parsed and evaluate(case, value).exact:
-                return f"exact_at_{rnd}"
         return "rounds_done"
 
 

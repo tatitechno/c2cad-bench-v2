@@ -364,3 +364,99 @@ def test_analysis_pipeline_end_to_end_on_mock(tmp_path):
     assert "\\newcommand{\\ExactJsonMockreference}{100.0}" in tex
     a02 = json.loads((tmp_path / "a02_attribution.json").read_text())
     assert "tool-json" in a02["contrasts"] and a02["probe"]
+
+
+
+# ---------------------------------------------------------------------------
+# final-review fixes: streaming parsers, repair without oracle stop, shift-aware named-part binding
+# ---------------------------------------------------------------------------
+class _FakeSSE:
+    status_code = 200
+    headers = {}
+
+    def __init__(self, events):
+        self.lines = []
+        for e in events:
+            self.lines += ["data: " + json.dumps(e), ""]
+        self.lines.append("data: [DONE]")
+
+    def iter_lines(self, decode_unicode=True):
+        yield from self.lines
+
+
+def test_openai_streaming_parser(monkeypatch):
+    ev = [{"model": "m-2026", "choices": [{"delta": {"content": '[{"a"'}}]},
+          {"choices": [{"delta": {"reasoning_content": "hmm"}}]},
+          {"choices": [{"delta": {"content": ": 1}]"}, "finish_reason": "stop"}]},
+          {"choices": [], "usage": {"prompt_tokens": 3, "completion_tokens": 4}}]
+    monkeypatch.setenv("OPENAI_API_KEY", "t")
+    monkeypatch.setattr(P, "_post", lambda url, h, body, st, stream: _FakeSSE(ev))
+    r = P._openai_like("openai", "m", "s", [{"role": "user", "content": "u"}], P.Settings(stream=True))
+    assert r.text == '[{"a": 1}]' and r.finish_reason == "stop" and r.returned_model == "m-2026"
+    assert P.billed_tokens("openai:m", r.usage) == (3, 4) and r.usage["visible_reasoning_chars"] == 3
+
+
+def test_google_streaming_parser_skips_thoughts(monkeypatch):
+    ev = [{"modelVersion": "g-1", "candidates": [{"content": {"parts": [{"text": "plan", "thought": True},
+                                                                         {"text": "[1"}]}}]},
+          {"candidates": [{"content": {"parts": [{"text": ", 2]"}]}, "finishReason": "STOP"}],
+           "usageMetadata": {"promptTokenCount": 5, "candidatesTokenCount": 6, "thoughtsTokenCount": 7}}]
+    monkeypatch.setenv("GOOGLE_API_KEY", "t")
+    monkeypatch.setattr(P, "_post", lambda url, h, body, st, stream: _FakeSSE(ev))
+    r = P._google("g", "s", [{"role": "user", "content": "u"}], P.Settings(stream=True))
+    assert r.text == "[1, 2]" and r.finish_reason == "STOP" and r.returned_model == "g-1"
+    assert P.billed_tokens("google:g", r.usage) == (5, 13)
+
+
+def test_stream_error_events_are_classified(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "t")
+    monkeypatch.setattr(P, "_post", lambda url, h, body, st, stream: _FakeSSE([{"error": {"code": 529, "message": "overloaded"}}]))
+    with pytest.raises(P._Transient):
+        P._openai_like("openai", "m", "s", [{"role": "user", "content": "u"}], P.Settings(stream=True))
+    monkeypatch.setattr(P, "_post", lambda url, h, body, st, stream: _FakeSSE([{"error": {"code": 400, "message": "bad schema"}}]))
+    with pytest.raises(P._Fatal):
+        P._openai_like("openai", "m", "s", [{"role": "user", "content": "u"}], P.Settings(stream=True))
+
+
+def test_generic_repair_runs_every_round_and_verifier_stops_only_when_clean():
+    import shutil
+    d = ROOT / "runs" / "selftest_pytest_repair"
+    shutil.rmtree(d, ignore_errors=True)
+    fams = "Spiral Staircase,Cannonball Pyramid,DNA Helix,Voxel Grid,Domino Ring"
+    RUN.main(["--profile", "mock-noisy", "--arms", "json", "--families", fams, "--run", d.name, "--workers", "8"])
+    RUN.main(["--profile", "mock-noisy", "--arms", "repair_generic,repair_verifier", "--families", fams,
+              "--repair-rounds", "3", "--run", d.name, "--workers", "8"])
+    S = [json.loads(l) for l in open(d / "scores.jsonl")]
+    seeds = {s["case_id"] for s in S if s["arm"] == "json" and not s["exact"] and s["response_status"] == "complete"}
+    assert seeds
+    gen = {}
+    for s in S:
+        if s["arm"] == "repair_generic":
+            gen.setdefault(s["case_id"], set()).add(s["round"])
+    assert all(gen.get(c) == {1, 2, 3} for c in seeds)            # no stop on exactness
+    cases_ = {c["case_id"]: c for c in CASES}
+    last = {}
+    for s in S:
+        if s["arm"] == "repair_verifier":
+            last[s["case_id"]] = max(last.get(s["case_id"], 0), s["round"])
+    R = {(json.loads(l)["case_id"], json.loads(l)["round"]): json.loads(l) for l in open(d / "responses.jsonl")
+         if json.loads(l)["arm"] == "repair_verifier"}
+    for c, rnd in last.items():
+        if rnd < 3:                                                # stopped early: its own report must be clean
+            val, _ = A.parse_json(R[(c, rnd)]["text"])
+            assert A.repair_feedback("repair_verifier", verify(cases_[c], val), val is not None) is None
+
+
+def test_named_parts_shift_one_based_full_answers_but_not_probes():
+    from c2cad import partlevel
+    from c2cad.geom import normalize
+    case = next(c for c in CASES if c["case_id"] == "spiral_staircase_level_1")
+    ref, _ = normalize(case["reference"])
+    one_based = copy.deepcopy(case["reference"])
+    for p in one_based:
+        p["id"] = p["id"] + 1
+    out, _ = normalize(one_based)
+    ids = A.probe_ids(case)
+    assert all(partlevel.named_parts(ref, out, ids)["exact_id"])
+    probe_out, _ = normalize([p for p in case["reference"] if p["id"] in ids])
+    assert all(partlevel.named_parts(ref, probe_out, ids, full_answer=False)["exact_id"])

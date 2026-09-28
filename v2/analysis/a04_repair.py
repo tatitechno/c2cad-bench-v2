@@ -119,8 +119,9 @@ def run(s: pd.DataFrame, r: pd.DataFrame, out_dir, r_dirs=None) -> dict:
         m = a.merge(b, on=["model", "family", "case_id"], suffixes=("_v", "_g"))
         m["d"] = m["exact_v"] - m["exact_g"]
         pooled = boot_paired_pooled(m)
+        from .a02_attribution import directional
         L += ["", f"H8 verifier - generic at round {R} (exact, pp, pooled): {fmt_ci(pooled, True)}; "
-                  f"sign-flip p = {signflip_p(m):.4f}", ""]
+                  f"sign-flip p = {signflip_p(m):.4f}; verdict: {directional(pooled)}", ""]
         data["h8"] = {"pooled": pooled, "p": signflip_p(m),
                       "per_model": {mo: boot_mean(g, "d") for mo, g in m.groupby("model")}}
         macros["\\EffVerifierMinusGeneric"] = f"{100 * pooled[0]:.1f}"
