@@ -19,7 +19,7 @@ Layout:
 | `v2/config/models.json` | Model registry: ids, output caps, reasoning settings, prices, verification status |
 | `v2/analysis/` | Pre-registered analysis (`reports/ANALYSIS_PLAN.md`), `python -m analysis.make_all` |
 | `v2/RUNBOOK.md` | How to run everything, with the cost table |
-| `v2/tests/` | `test_v2_validity.py` (scorer) and `test_v2_runner.py` (runner, arms, kernel, analysis); `pytest -q v2/tests` → 1,092 passed at the last update |
+| `v2/tests/` | `test_v2_validity.py` (scorer) and `test_v2_runner.py` (runner, arms, kernel, analysis); `pytest -q v2/tests` → 1,097 passed at the last update |
 
 ---
 

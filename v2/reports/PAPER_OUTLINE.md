@@ -104,5 +104,5 @@ Read the full texts of P3D-Bench, AssemCAD, AIDL and ExpConCAD before citing the
 - `results/e00..e08`
 - `atlas/`
 - `PRIOR_ART.md`
-- 1,092 tests
+- 1,097 tests
 - after the runs: `results/analysis/` (a01–a06, the figures, `paper_numbers.tex`)
